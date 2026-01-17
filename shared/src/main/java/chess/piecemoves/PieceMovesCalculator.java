@@ -10,9 +10,24 @@ import java.util.Collection;
 import java.util.List;
 
 public interface PieceMovesCalculator {
+    /**
+     * @return the possible directions the piece can move
+     */
     int[][] getDirections();
+
+    /**
+     * @return if the piece will continue in a direction until stopped
+     */
     boolean getMoveToObstruction();
 
+    /**
+     * Calculates the possible movements of a piece given a ChessBoard and ChessPosition.
+     * Internally relies on getDirections and getMoveToObstruction defined in implementations.
+     *
+     * @param board     the representation of the chess board
+     * @param position  the position of the given chess piece
+     * @return A collection of possible chessMoves
+     */
     default Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         ChessPiece piece = board.getPiece(position);
         List<ChessMove> moves = new ArrayList<>();
