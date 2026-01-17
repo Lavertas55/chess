@@ -26,7 +26,7 @@ public interface PieceMovesCalculator {
      *
      * @param board     the representation of the chess board
      * @param position  the position of the given chess piece
-     * @return A collection of possible chessMoves
+     * @return a collection of possible chessMoves
      */
     default Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         ChessPiece piece = board.getPiece(position);
