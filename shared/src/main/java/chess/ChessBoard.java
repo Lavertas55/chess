@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -40,8 +43,43 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (int row = 1; row <= board.length; row++) {
+            ChessGame.TeamColor pieceColor;
+            ChessPiece.PieceType pieceType = ChessPiece.PieceType.PAWN;
+
+            if (row <= 2) {
+                pieceColor = ChessGame.TeamColor.WHITE;
+            }
+            else if (row >= 7) {
+                pieceColor = ChessGame.TeamColor.BLACK;
+            }
+            else {
+                pieceColor = null;
+            }
+
+            for (int col = 1; col <= board[row - 1].length; col++) {
+                ChessPosition currentPosition = new ChessPosition(row, col);
+
+                if (row == 1 || row == 8) {
+                    pieceType = switch (col) {
+                        case 1, 8 -> ChessPiece.PieceType.ROOK;
+                        case 2, 7 -> ChessPiece.PieceType.KNIGHT;
+                        case 3, 6 -> ChessPiece.PieceType.BISHOP;
+                        case 4 -> ChessPiece.PieceType.QUEEN;
+                        case 5 -> ChessPiece.PieceType.KING;
+                        default -> null;
+                    };
+                }
+
+                if (pieceType != null && pieceColor != null) {
+                    this.addPiece(currentPosition, new ChessPiece(pieceColor, pieceType));
+                } else {
+                    this.addPiece(currentPosition, null);
+                }
+            }
+        }
     }
+
 
     /**
      * Determines if a given coordinates is in bounds
@@ -52,5 +90,41 @@ public class ChessBoard {
      */
     public boolean inBounds(int row, int col) {
         return row > 0 && row <= board.length && col > 0 && col <= board[row-1].length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+
+        for (ChessPiece[] row : board) {
+            String rowString = "";
+
+            for (ChessPiece piece : row) {
+                if (piece == null) {
+                    rowString += " |";
+                }
+                else {
+                    rowString += String.format("%s|", piece);
+                }
+            }
+
+            result += String.format("%s\n", rowString.substring(0, rowString.length() - 1));
+        }
+
+        return result;
     }
 }
