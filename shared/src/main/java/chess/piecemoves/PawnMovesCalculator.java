@@ -10,7 +10,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
     private final int[][] attackDirections;
     private final int[][] directions;
     private final int promotionRow;
-    private static final boolean moveToObstruction = false;
+    private static final boolean MOVE_TO_OBSTRUCTION = false;
 
     public PawnMovesCalculator(ChessGame.TeamColor pieceColor, ChessPosition position) {
         int movementDirection = pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1;
@@ -40,7 +40,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
      */
     @Override
     public boolean getMoveToObstruction() {
-        return moveToObstruction;
+        return MOVE_TO_OBSTRUCTION;
     }
 
     /**

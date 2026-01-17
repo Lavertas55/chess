@@ -1,15 +1,15 @@
 package chess.piecemoves;
 
 public class RookMovesCalculator implements PieceMovesCalculator {
-    private static final int[][] directions = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };
-    private static final boolean moveToObstruction = true;
+    private static final int[][] DIRECTIONS = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };
+    private static final boolean MOVE_TO_OBSTRUCTION = true;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public int[][] getDirections() {
-        return directions;
+        return DIRECTIONS;
     }
 
     /**
@@ -17,6 +17,6 @@ public class RookMovesCalculator implements PieceMovesCalculator {
      */
     @Override
     public boolean getMoveToObstruction() {
-        return moveToObstruction;
+        return MOVE_TO_OBSTRUCTION;
     }
 }
