@@ -108,23 +108,23 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
 
         for (ChessPiece[] row : board) {
-            String rowString = "";
+            StringBuilder rowString = new StringBuilder();
 
             for (ChessPiece piece : row) {
                 if (piece == null) {
-                    rowString += " |";
+                    rowString.append(" |");
                 }
                 else {
-                    rowString += String.format("%s|", piece);
+                    rowString.append(String.format("%s|", piece));
                 }
             }
 
-            result += String.format("%s\n", rowString.substring(0, rowString.length() - 1));
+            result.insert(0, String.format("%s\n", rowString.substring(0, rowString.length() - 1)));
         }
 
-        return result;
+        return result.toString();
     }
 }
