@@ -3,7 +3,6 @@ package chess;
 import chess.piecemoves.*;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -56,34 +55,16 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        PieceType pieceType = piece.getPieceType();
+        PieceMovesCalculator movesCalculator = switch (type) {
+            case PAWN   -> new PawnMovesCalculator(pieceColor, myPosition);
+            case BISHOP -> new BishopMovesCalculator();
+            case KNIGHT -> new KnightMovesCalculator();
+            case ROOK   -> new RookMovesCalculator();
+            case QUEEN  -> new QueenMovesCalculator();
+            case KING   -> new KingMovesCalculator();
+        };
 
-        if (pieceType == PieceType.BISHOP) {
-            BishopMovesCalculator moveCalculator = new BishopMovesCalculator();
-            return moveCalculator.pieceMoves(board, myPosition);
-        }
-        else if (pieceType == PieceType.KING) {
-            KingMovesCalculator moveCalculator = new KingMovesCalculator();
-            return moveCalculator.pieceMoves(board, myPosition);
-        }
-        else if (pieceType == PieceType.KNIGHT) {
-            KnightMovesCalculator moveCalculator = new KnightMovesCalculator();
-            return moveCalculator.pieceMoves(board, myPosition);
-        }
-        else if (pieceType == PieceType.PAWN) {
-            PawnMovesCalculator moveCalculator = new PawnMovesCalculator(piece.getTeamColor(), myPosition);
-            return moveCalculator.pieceMoves(board, myPosition);
-        }
-        else if (pieceType == PieceType.QUEEN) {
-            QueenMovesCalculator moveCalculator = new QueenMovesCalculator();
-            return moveCalculator.pieceMoves(board, myPosition);
-        }
-        else if (pieceType == PieceType.ROOK) {
-            RookMovesCalculator moveCalculator = new RookMovesCalculator();
-            return moveCalculator.pieceMoves(board, myPosition);
-        }
-        return List.of();
+        return movesCalculator.pieceMoves(board, myPosition);
     }
 
     @Override

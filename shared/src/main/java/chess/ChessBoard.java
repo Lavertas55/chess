@@ -84,11 +84,13 @@ public class ChessBoard {
     /**
      * Determines if a given coordinates is in bounds
      *
-     * @param row The row number to check
-     * @param col The column number to check
+     * @param position position to check
      * @return True if the position is in bounds, False otherwise
      */
-    public boolean inBounds(int row, int col) {
+    public boolean inBounds(ChessPosition position) {
+        int row = position.getRow();
+        int col = position.getColumn();
+
         return row > 0 && row <= board.length && col > 0 && col <= board[row-1].length;
     }
 

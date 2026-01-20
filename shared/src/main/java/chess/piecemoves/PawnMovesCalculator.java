@@ -36,6 +36,13 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
     }
 
     /**
+     * @return the possible attack directions
+     */
+    public int[][] getAttackDirections() {
+        return attackDirections;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -79,14 +86,19 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
         ChessPiece piece = board.getPiece(position);
         List<ChessMove> moves = new ArrayList<>();
 
-        for (int[] direction : getDirections()) {
+        ChessGame.TeamColor pieceColor = piece.getTeamColor();
+        int[][] directions = getDirections();
+
+        for (int[] direction : directions) {
             int row = position.getRow() + direction[0];
             int col = position.getColumn() + direction[1];
 
-            if (board.inBounds(row, col)) {
-                ChessPiece destination = board.getPiece(new ChessPosition(row, col));
+            ChessPosition destination = new ChessPosition(row, col);
 
-                if (destination == null) {
+            if (board.inBounds(destination)) {
+                ChessPiece destinationObj = board.getPiece(new ChessPosition(row, col));
+
+                if (destinationObj == null) {
                     moves.addAll(promotionHandler(position, new ChessPosition(row, col)));
                 }
                 else {
@@ -95,14 +107,18 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
             }
         }
 
+        int[][] attackDirections = getAttackDirections();
+
         for (int[] attackDirection : attackDirections) {
             int row = position.getRow() + attackDirection[0];
             int col = position.getColumn() + attackDirection[1];
 
-            if (board.inBounds(row, col)) {
-                ChessPiece destination = board.getPiece(new ChessPosition(row, col));
+            ChessPosition destination = new ChessPosition(row, col);
 
-                if (destination != null && destination.getTeamColor() != piece.getTeamColor()) {
+            if (board.inBounds(destination)) {
+                ChessPiece destinationObj = board.getPiece(new ChessPosition(row, col));
+
+                if (destinationObj != null && destinationObj.getTeamColor() != pieceColor) {
                     moves.addAll(promotionHandler(position, new ChessPosition(row, col)));
                 }
             }
