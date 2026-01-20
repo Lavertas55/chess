@@ -38,24 +38,28 @@ public interface PieceMovesCalculator {
             int row = position.getRow() + direction[0];
             int col = position.getColumn() + direction[1];
 
-            do {
-                if (board.inBounds(row, col)) {
-                    ChessPiece destination = board.getPiece(new ChessPosition(row, col));
+            ChessPosition destination = new ChessPosition(row, col);
 
-                    if (destination == null) {
+            do {
+                if (board.inBounds(destination)) {
+                    ChessPiece destinationObj = board.getPiece(new ChessPosition(row, col));
+
+                    if (destinationObj == null) {
                         moves.add(new ChessMove(position, new ChessPosition(row, col), null));
-                    } else if (destination.getTeamColor() != pieceColor) {
+                    } else if (destinationObj.getTeamColor() != pieceColor) {
                         moves.add(new ChessMove(position, new ChessPosition(row, col), null));
                         break;
-                    } else if (destination.getTeamColor() == pieceColor) {
+                    } else if (destinationObj.getTeamColor() == pieceColor) {
                         break;
                     }
 
                     row += direction[0];
                     col += direction[1];
+
+                    destination = new ChessPosition(row, col);
                 }
 
-            } while (moveToObstruction && board.inBounds(row, col));
+            } while (moveToObstruction && board.inBounds(destination));
         }
 
         return moves;

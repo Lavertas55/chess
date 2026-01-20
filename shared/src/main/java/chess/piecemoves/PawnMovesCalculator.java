@@ -93,10 +93,12 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
             int row = position.getRow() + direction[0];
             int col = position.getColumn() + direction[1];
 
-            if (board.inBounds(row, col)) {
-                ChessPiece destination = board.getPiece(new ChessPosition(row, col));
+            ChessPosition destination = new ChessPosition(row, col);
 
-                if (destination == null) {
+            if (board.inBounds(destination)) {
+                ChessPiece destinationObj = board.getPiece(new ChessPosition(row, col));
+
+                if (destinationObj == null) {
                     moves.addAll(promotionHandler(position, new ChessPosition(row, col)));
                 }
                 else {
@@ -111,10 +113,12 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
             int row = position.getRow() + attackDirection[0];
             int col = position.getColumn() + attackDirection[1];
 
-            if (board.inBounds(row, col)) {
-                ChessPiece destination = board.getPiece(new ChessPosition(row, col));
+            ChessPosition destination = new ChessPosition(row, col);
 
-                if (destination != null && destination.getTeamColor() != pieceColor) {
+            if (board.inBounds(destination)) {
+                ChessPiece destinationObj = board.getPiece(new ChessPosition(row, col));
+
+                if (destinationObj != null && destinationObj.getTeamColor() != pieceColor) {
                     moves.addAll(promotionHandler(position, new ChessPosition(row, col)));
                 }
             }
