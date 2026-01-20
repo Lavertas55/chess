@@ -1,9 +1,6 @@
 package chess.piecemoves;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,9 +27,14 @@ public interface PieceMovesCalculator {
      */
     default Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         ChessPiece piece = board.getPiece(position);
+        ChessGame.TeamColor pieceColor = piece.getTeamColor();
+
         List<ChessMove> moves = new ArrayList<>();
 
-        for (int[] direction : getDirections()) {
+        int[][] directions = getDirections();
+        boolean moveToObstruction = getMoveToObstruction();
+
+        for (int[] direction : directions) {
             int row = position.getRow() + direction[0];
             int col = position.getColumn() + direction[1];
 
@@ -42,17 +44,18 @@ public interface PieceMovesCalculator {
 
                     if (destination == null) {
                         moves.add(new ChessMove(position, new ChessPosition(row, col), null));
-                    } else if (destination.getTeamColor() != piece.getTeamColor()) {
+                    } else if (destination.getTeamColor() != pieceColor) {
                         moves.add(new ChessMove(position, new ChessPosition(row, col), null));
                         break;
-                    } else if (destination.getTeamColor() == piece.getTeamColor()) {
+                    } else if (destination.getTeamColor() == pieceColor) {
                         break;
                     }
+
+                    row += direction[0];
+                    col += direction[1];
                 }
 
-                row += direction[0];
-                col += direction[1];
-            } while (getMoveToObstruction() && board.inBounds(row, col));
+            } while (moveToObstruction && board.inBounds(row, col));
         }
 
         return moves;
