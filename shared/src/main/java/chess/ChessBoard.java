@@ -10,8 +10,10 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
+    public static final int ROW_BOARD_LENGTH = 8;
+    public static final int COL_BOARD_LENGTH = 8;
 
-    private final ChessPiece[][] board = new ChessPiece[8][8];
+    private final ChessPiece[][] board = new ChessPiece[ROW_BOARD_LENGTH][COL_BOARD_LENGTH];
 
     public ChessBoard() {
         
