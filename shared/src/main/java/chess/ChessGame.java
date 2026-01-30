@@ -10,7 +10,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessGame {
+public class ChessGame implements Cloneable {
 
     private ChessGame.TeamColor currentTeam;
     private ChessBoard board;
@@ -54,7 +54,34 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+
+        if (piece == null) {
+            return null;
+        }
+
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
+        Collection<ChessMove> validMoves = new HashSet<>();
+
+        for (ChessMove move : possibleMoves) {
+            ChessGame testGame = clone();
+
+            ChessPosition endPosition = move.getEndPosition();
+            ChessPiece.PieceType promotionType = move.getPromotionPiece();
+
+            if (promotionType != null) {
+                piece = new ChessPiece(piece.getTeamColor(), promotionType);
+            }
+
+            testGame.board.addPiece(endPosition, piece);
+            testGame.board.addPiece(startPosition, null);
+
+            if (!testGame.isInCheck(piece.getTeamColor())) {
+                validMoves.add(move);
+            }
+        }
+
+        return validMoves;
     }
 
     /**
@@ -140,6 +167,19 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public ChessGame clone() {
+        try {
+            ChessGame gameClone = (ChessGame) super.clone();
+            gameClone.setBoard(new ChessBoard(board));
+
+            return gameClone;
+        }
+        catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
