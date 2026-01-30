@@ -66,15 +66,7 @@ public class ChessGame implements Cloneable {
         for (ChessMove move : possibleMoves) {
             ChessGame testGame = clone();
 
-            ChessPosition endPosition = move.getEndPosition();
-            ChessPiece.PieceType promotionType = move.getPromotionPiece();
-
-            if (promotionType != null) {
-                piece = new ChessPiece(piece.getTeamColor(), promotionType);
-            }
-
-            testGame.board.addPiece(endPosition, piece);
-            testGame.board.addPiece(startPosition, null);
+            testGame.executeMove(move);
 
             if (!testGame.isInCheck(piece.getTeamColor())) {
                 validMoves.add(move);
@@ -82,6 +74,21 @@ public class ChessGame implements Cloneable {
         }
 
         return validMoves;
+    }
+
+    private void executeMove(ChessMove move) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece.PieceType promotionType = move.getPromotionPiece();
+
+        ChessPiece piece = board.getPiece(startPosition);
+
+        if (promotionType != null) {
+            piece = new ChessPiece(piece.getTeamColor(), promotionType);
+        }
+
+        board.addPiece(endPosition, piece);
+        board.addPiece(startPosition, null);
     }
 
     /**
