@@ -46,6 +46,23 @@ public class ChessGame implements Cloneable {
         BLACK
     }
 
+    private Collection<ChessMove> candidateMoves(TeamColor teamColor) {
+        Collection<ChessMove> candidateMoves = new HashSet<>();
+
+        for (int row = 1; row <= ChessBoard.ROW_BOARD_LENGTH; row++) {
+            for (int col = 1; col <= ChessBoard.COL_BOARD_LENGTH; col++) {
+                ChessPosition currentPosition = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(currentPosition);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    candidateMoves.addAll(validMoves(currentPosition));
+                }
+            }
+        }
+
+        return candidateMoves;
+    }
+
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -162,7 +179,9 @@ public class ChessGame implements Cloneable {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> candidateMoves = candidateMoves(teamColor);
+
+        return candidateMoves.isEmpty() && isInCheck(teamColor);
     }
 
     /**
@@ -173,7 +192,9 @@ public class ChessGame implements Cloneable {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> candidateMoves = candidateMoves(teamColor);
+
+        return candidateMoves.isEmpty() && !isInCheck(teamColor);
     }
 
     /**
