@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -17,6 +18,22 @@ public class ChessBoard {
 
     public ChessBoard() {
         
+    }
+
+    public ChessBoard(ChessBoard oldBoard) {
+        for (int row = 1; row <= ROW_BOARD_LENGTH; row++) {
+            for (int col = 1; col <= COL_BOARD_LENGTH; col++) {
+                ChessPosition currentPosition = new ChessPosition(row, col);
+                ChessPiece currentPiece = oldBoard.getPiece(currentPosition);
+
+                ChessPiece pieceClone = null;
+                if (currentPiece != null) {
+                    pieceClone = oldBoard.getPiece(currentPosition).clone();
+                }
+
+                addPiece(currentPosition, pieceClone);
+            }
+        }
     }
 
     /**
