@@ -169,7 +169,9 @@ public class ChessGame implements Cloneable {
         if (kingPosition == null) {
             throw new RuntimeException(String.format("Team %s has no king", teamColor));
         }
-        else return opponentMoves.contains(kingPosition);
+        else {
+            return opponentMoves.contains(kingPosition);
+        }
     }
 
     /**
