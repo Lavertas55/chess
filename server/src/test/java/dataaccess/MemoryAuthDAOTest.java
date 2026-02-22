@@ -59,12 +59,15 @@ class MemoryAuthDAOTest {
     }
 
     @Test
-    void deleteAuth() {
+    void deleteAuth() throws DataAccessException {
         assertEquals(1, authStorage.size());
 
         memoryDAO.deleteAuth(validAuth.authToken());
 
         assertEquals(0, authStorage.size());
+
+        assertThrows(DataAccessException.class, () -> memoryDAO.deleteAuth(null));
+        assertThrows(DataAccessException.class, () -> memoryDAO.deleteAuth("1111"));
     }
 
     @Test
