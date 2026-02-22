@@ -20,7 +20,7 @@ public class MemoryGameDAO implements GameDAO {
         }
 
         int gameID = gameData.gameID();
-        if (gameStorage.containsKey(gameID)) {
+        if (hasGameID(gameID)) {
             throw new DataAccessException(String.format("gameID = %d already in use.", gameID));
         }
 
@@ -29,11 +29,15 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        if (!gameStorage.containsKey(gameID)) {
+        if (!hasGameID(gameID)) {
             throw new DataAccessException(String.format("gameID = %d not in use.", gameID));
         }
 
         return gameStorage.get(gameID);
+    }
+
+    private boolean hasGameID(int gameID) {
+        return gameStorage.containsKey(gameID);
     }
 
     @Override
