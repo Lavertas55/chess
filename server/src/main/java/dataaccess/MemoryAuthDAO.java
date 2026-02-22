@@ -25,7 +25,7 @@ public class MemoryAuthDAO implements AuthDAO {
         String authToken = authData.authToken();
 
         if (hasToken(authToken)) {
-            throw new DataAccessException("Auth Token is in use.");
+            throw new DataAccessException(String.format("Auth Token %s is in use.", authToken));
         }
 
         authStorage.put(authToken, authData);
@@ -34,7 +34,7 @@ public class MemoryAuthDAO implements AuthDAO {
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         if (!hasToken(authToken)) {
-            throw new DataAccessException("Auth Token does not exist.");
+            throw new DataAccessException(String.format("Auth Token %s does not exist.", authToken));
         }
 
         return authStorage.get(authToken);
@@ -43,7 +43,7 @@ public class MemoryAuthDAO implements AuthDAO {
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
         if (!hasToken(authToken)) {
-            throw new DataAccessException("Auth Token does not exist.");
+            throw new DataAccessException(String.format("Auth Token %s does not exist.", authToken));
         }
 
         authStorage.remove(authToken);
