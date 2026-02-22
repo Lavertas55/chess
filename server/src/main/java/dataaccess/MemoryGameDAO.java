@@ -16,7 +16,7 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public void createGame(GameData gameData) throws DataAccessException {
         if (gameData == null) {
-            throw new DataAccessException("Must provide a valid GameData object.");
+            throw new DataAccessException("gameData cannot be null.");
         }
 
         int gameID = gameData.gameID();
