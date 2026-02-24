@@ -20,7 +20,7 @@ class MemoryAuthDAOTest {
         String authToken = "1234";
         String username = "test";
 
-        validAuth = new AuthData(authToken, username);
+        validAuth = new AuthData(username, authToken);
     }
 
     @BeforeEach
@@ -33,7 +33,7 @@ class MemoryAuthDAOTest {
         String newAuthToken = "1111";
         String username = "new auth";
 
-        AuthData newAuth = new AuthData(newAuthToken, username);
+        AuthData newAuth = new AuthData(username, newAuthToken);
         memoryDAO.createAuth(newAuth);
 
         assertThrows(BadDataException.class, () -> memoryDAO.createAuth(null));
