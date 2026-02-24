@@ -1,6 +1,6 @@
 package dataaccess;
 
-import dataaccess.exception.DataAccessException;
+import dataaccess.exception.*;
 import model.GameData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,23 +33,24 @@ public class MemoryGameDAOTest {
     }
 
     @Test
-    void testCreateGame() throws DataAccessException {
+    void testCreateGame() throws DataException {
         memoryDAO.createGame(validGame);
 
-        assertThrows(DataAccessException.class, () -> memoryDAO.createGame(null));
-        assertThrows(DataAccessException.class, () -> memoryDAO.createGame(validGame));
+        assertThrows(BadDataException.class, () -> memoryDAO.createGame(null));
+        assertThrows(DataConflictException.class, () -> memoryDAO.createGame(validGame));
     }
 
     @Test
-    void testGetGame() throws DataAccessException {
+    void testGetGame() throws DataException {
         memoryDAO.createGame(validGame);
 
         assertEquals(validGame, memoryDAO.getGame(0));
-        assertThrows(DataAccessException.class, () -> memoryDAO.getGame(1));
+
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.getGame(1));
     }
 
     @Test
-    void testListGames() throws DataAccessException {
+    void testListGames() throws DataException {
         memoryDAO.createGame(validGame);
 
         Collection<GameData> gameList = new HashSet<>(Set.of(validGame));
@@ -57,7 +58,7 @@ public class MemoryGameDAOTest {
     }
 
     @Test
-    void testUpdateWhiteUser() throws DataAccessException {
+    void testUpdateWhiteUser() throws DataException {
         memoryDAO.createGame(validGame);
 
         String newUsername = "new username";
@@ -66,11 +67,11 @@ public class MemoryGameDAOTest {
         GameData game = memoryDAO.getGame(0);
         assertEquals(newUsername, game.whiteUsername());
 
-        assertThrows(DataAccessException.class, () -> memoryDAO.updateGameWhiteUser(1, newUsername));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameWhiteUser(1, newUsername));
     }
 
     @Test
-    void testUpdateBlackUser() throws DataAccessException {
+    void testUpdateBlackUser() throws DataException {
         memoryDAO.createGame(validGame);
 
         String newUsername = "new username";
@@ -79,11 +80,11 @@ public class MemoryGameDAOTest {
         GameData game = memoryDAO.getGame(0);
         assertEquals(newUsername, game.blackUsername());
 
-        assertThrows(DataAccessException.class, () -> memoryDAO.updateGameBlackUser(1, newUsername));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameBlackUser(1, newUsername));
     }
 
     @Test
-    void testUpdateGameString() throws DataAccessException {
+    void testUpdateGameString() throws DataException {
         memoryDAO.createGame(validGame);
 
         String newGameString = "new game string";
@@ -92,15 +93,15 @@ public class MemoryGameDAOTest {
         GameData game = memoryDAO.getGame(0);
         assertEquals(newGameString, game.gameString());
 
-        assertThrows(DataAccessException.class, () -> memoryDAO.updateGameString(1, newGameString));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameString(1, newGameString));
     }
 
     @Test
-    void testClear() throws DataAccessException {
+    void testClear() throws DataException {
         memoryDAO.createGame(validGame);
 
         memoryDAO.clear();
 
-        assertThrows(DataAccessException.class, () -> memoryDAO.getGame(validGame.gameID()));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.getGame(validGame.gameID()));
     }
 }

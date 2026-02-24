@@ -1,6 +1,6 @@
 package dataaccess;
 
-import dataaccess.exception.DataAccessException;
+import dataaccess.exception.*;
 import model.UserData;
 
 import java.util.HashMap;
@@ -10,24 +10,24 @@ public class MemoryUserDAO implements UserDAO {
     private final HashMap<String, UserData> userStorage = new HashMap<>();
 
     @Override
-    public void createUser(UserData userData) throws DataAccessException {
+    public void createUser(UserData userData) throws DataException {
         if (userData == null) {
-            throw new DataAccessException("userData cannot be null.");
+            throw new BadDataException("userData cannot be null.");
         }
 
         String username = userData.username();
 
         if (hasUsername(username)) {
-            throw new DataAccessException(String.format("username %s is already in use.", username));
+            throw new DataConflictException(String.format("username %s is already in use.", username));
         }
 
         userStorage.put(username, userData);
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) throws DataException {
         if (!hasUsername(username)) {
-            throw new DataAccessException(String.format("username %s is not in use.", username));
+            throw new DataNotFoundException(String.format("username %s is not in use.", username));
         }
 
         return userStorage.get(username);

@@ -1,6 +1,6 @@
 package dataaccess;
 
-import dataaccess.exception.DataAccessException;
+import dataaccess.exception.*;
 import model.GameData;
 
 import java.util.Collection;
@@ -11,23 +11,23 @@ public class MemoryGameDAO implements GameDAO {
     private final HashMap<Integer, GameData> gameStorage = new HashMap<>();
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
+    public void createGame(GameData gameData) throws DataException {
         if (gameData == null) {
-            throw new DataAccessException("gameData cannot be null.");
+            throw new BadDataException("gameData cannot be null.");
         }
 
         int gameID = gameData.gameID();
         if (hasGameID(gameID)) {
-            throw new DataAccessException(String.format("gameID = %d already in use.", gameID));
+            throw new DataConflictException(String.format("gameID = %d already in use.", gameID));
         }
 
         gameStorage.put(gameData.gameID(), gameData);
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) throws DataException {
         if (!hasGameID(gameID)) {
-            throw new DataAccessException(String.format("gameID = %d not in use.", gameID));
+            throw new DataNotFoundException(String.format("gameID = %d not in use.", gameID));
         }
 
         return gameStorage.get(gameID);
@@ -43,8 +43,9 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGameWhiteUser(int gameID, String whiteUsername) throws DataAccessException {
+    public void updateGameWhiteUser(int gameID, String whiteUsername) throws DataException {
         GameData game = getGame(gameID);
+
         GameData updatedGame = new GameData(
                 game.gameID(),
                 whiteUsername,
@@ -57,8 +58,9 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGameBlackUser(int gameID, String blackUsername) throws DataAccessException {
+    public void updateGameBlackUser(int gameID, String blackUsername) throws DataException {
         GameData game = getGame(gameID);
+
         GameData updatedGame = new GameData(
                 game.gameID(),
                 game.whiteUsername(),
@@ -71,8 +73,9 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGameString(int gameID, String gameString) throws DataAccessException {
+    public void updateGameString(int gameID, String gameString) throws DataException {
         GameData game = getGame(gameID);
+
         GameData updatedGame = new GameData(
                 game.gameID(),
                 game.whiteUsername(),
