@@ -3,15 +3,11 @@ package dataaccess;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
-    private final Map<Integer, GameData> gameStorage;
-
-    public MemoryGameDAO(Map<Integer, GameData> gameStorage) {
-        this.gameStorage = gameStorage;
-    }
+    private final HashMap<Integer, GameData> gameStorage = new HashMap<>();
 
     @Override
     public void createGame(GameData gameData) throws DataAccessException {

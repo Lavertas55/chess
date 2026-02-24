@@ -2,15 +2,11 @@ package dataaccess;
 
 import model.AuthData;
 
-import java.util.Map;
+import java.util.HashMap;
 
 public class MemoryAuthDAO implements AuthDAO {
 
-    private final Map<String, AuthData> authStorage;
-
-    public MemoryAuthDAO(Map<String, AuthData> authStorage) {
-        this.authStorage = authStorage;
-    }
+    private final HashMap<String, AuthData> authStorage = new HashMap<>();
 
     private boolean hasToken(String authToken) {
         return authStorage.containsKey(authToken);
