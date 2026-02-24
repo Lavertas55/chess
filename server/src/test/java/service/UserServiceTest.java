@@ -69,7 +69,7 @@ class UserServiceTest {
                 ResponseException.class,
                 () -> userService.login(new LoginRequest("bad user", "1234"))
         );
-        assertEquals(ResponseException.Code.NOT_FOUND, exception.getCode());
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
 
         exception = assertThrows(
                 ResponseException.class,

@@ -4,14 +4,18 @@ import dataaccess.*;
 import dataaccess.exception.BadDataException;
 import dataaccess.exception.DataConflictException;
 import dataaccess.exception.DataException;
+import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.log.Log;
 import request.LoginRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
 import response.RegisterResponse;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
@@ -61,8 +65,39 @@ public class UserService {
         return new RegisterResponse(authData.username(), authData.authToken());
     }
 
-    public LoginResponse login(LoginRequest loginRequest) {
-        throw new RuntimeException("not implemented");
+    public LoginResponse login(LoginRequest loginRequest) throws ResponseException {
+        String username = loginRequest.username();
+
+        try {
+            UserData userData = userDAO.getUser(username);
+
+            if (!Objects.equals(userData.password(), loginRequest.password())) {
+                throw new DataNotFoundException("Invalid Password");
+            }
+        }
+        catch (DataNotFoundException e) {
+            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Invalid Credentials");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+
+        AuthData authData = new AuthData(
+                loginRequest.username(),
+                generateToken()
+        );
+
+        try {
+            authDAO.createAuth(authData);
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+
+        return new LoginResponse(
+                authData.username(),
+                authData.authToken()
+        );
     }
 
     private String generateToken() {
