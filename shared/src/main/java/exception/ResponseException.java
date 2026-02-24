@@ -12,7 +12,8 @@ public class ResponseException extends Exception {
         FORBIDDEN,
         UNAUTHORIZED,
         NOT_FOUND,
-        BAD_REQUEST
+        BAD_REQUEST,
+        SERVER_ERROR
     }
 
     public ResponseException(Code code, String message) {
@@ -39,6 +40,7 @@ public class ResponseException extends Exception {
             case UNAUTHORIZED -> 401;
             case NOT_FOUND -> 404;
             case BAD_REQUEST -> 400;
+            case SERVER_ERROR -> 500;
         };
     }
 
