@@ -34,11 +34,7 @@ class MemoryAuthDAOTest {
         String username = "new auth";
 
         AuthData newAuth = new AuthData(newAuthToken, username);
-        try {
-            memoryDAO.createAuth(newAuth);
-        } catch (dataaccess.exception.DataException e) {
-            throw new RuntimeException(e);
-        }
+        memoryDAO.createAuth(newAuth);
 
         assertThrows(BadDataException.class, () -> memoryDAO.createAuth(null));
         assertThrows(DataConflictException.class, () -> memoryDAO.createAuth(newAuth));
@@ -46,17 +42,9 @@ class MemoryAuthDAOTest {
 
     @Test
     void getAuth() throws DataException {
-        try {
-            memoryDAO.createAuth(validAuth);
-        } catch (dataaccess.exception.DataException e) {
-            throw new RuntimeException(e);
-        }
+        memoryDAO.createAuth(validAuth);
 
-        try {
-            assertEquals(validAuth, memoryDAO.getAuth(validAuth.authToken()));
-        } catch (dataaccess.exception.DataException e) {
-            throw new RuntimeException(e);
-        }
+        assertEquals(validAuth, memoryDAO.getAuth(validAuth.authToken()));
 
         assertThrows(DataNotFoundException.class, () -> memoryDAO.getAuth(null));
         assertThrows(DataNotFoundException.class, () -> memoryDAO.getAuth("1111"));
@@ -64,17 +52,9 @@ class MemoryAuthDAOTest {
 
     @Test
     void deleteAuth() throws DataException {
-        try {
-            memoryDAO.createAuth(validAuth);
-        } catch (dataaccess.exception.DataException e) {
-            throw new RuntimeException(e);
-        }
+        memoryDAO.createAuth(validAuth);
 
-        try {
-            memoryDAO.deleteAuth(validAuth.authToken());
-        } catch (dataaccess.exception.DataException e) {
-            throw new RuntimeException(e);
-        }
+        memoryDAO.deleteAuth(validAuth.authToken());
 
         assertThrows(DataNotFoundException.class, () -> memoryDAO.deleteAuth(null));
         assertThrows(DataNotFoundException.class, () -> memoryDAO.deleteAuth("1111"));
