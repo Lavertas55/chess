@@ -1,8 +1,12 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.exception.DataException;
+import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.AuthData;
+
+import java.util.UUID;
 
 public class AuthService {
 
@@ -12,15 +16,40 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public boolean isValidToken(String authToken) {
-        throw new RuntimeException("not implemented");
+    public boolean isValidToken(String authToken) throws ResponseException {
+        try {
+            AuthData authData = authDAO.getAuth(authToken);
+        }
+        catch (DataNotFoundException e) {
+            return false;
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+
+        return true;
     }
 
-    public String generateSession(String username) {
-        throw new RuntimeException("not implemented");
+    public String generateSession(String username) throws ResponseException {
+        if (username == null) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "username cannot be null.");
+        }
+
+        String authToken = generateToken();
+
+        AuthData authData = new AuthData(username, authToken);
+
+        try {
+            authDAO.createAuth(authData);
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+
+        return authToken;
     }
 
-    public AuthData getSession(String authToken) throws ResponseException {
-        throw new RuntimeException("not implemented");
+    private String generateToken() {
+        return UUID.randomUUID().toString();
     }
 }

@@ -32,15 +32,21 @@ class AuthServiceTest {
     }
 
     @Test
-    void isValidToken() throws DataException {
+    void validateValidToken() throws ResponseException, DataException {
         authDAO.createAuth(validAuth);
 
         assert(authService.isValidToken(validAuth.authToken()));
+    }
+
+    @Test
+    void validateInvalidToken() throws ResponseException, DataException {
+        authDAO.createAuth(validAuth);
+
         assert(!authService.isValidToken("1234"));
     }
 
     @Test
-    void generateSession() throws DataException {
+    void generateSession() throws DataException, ResponseException {
         String authToken = authService.generateSession(validAuth.username());
 
         AuthData testAuth = new AuthData(validAuth.username(), authToken);
@@ -49,16 +55,12 @@ class AuthServiceTest {
     }
 
     @Test
-    void getSession() throws ResponseException, DataException {
-        authDAO.createAuth(validAuth);
-
-        assertEquals(validAuth, authService.getSession(validAuth.authToken()));
-
+    void generateSessionBadInput() throws ResponseException {
         ResponseException exception = assertThrows(
                 ResponseException.class,
-                () -> authService.getSession("1234")
+                () -> authService.generateSession(null)
         );
 
-        assertEquals(ResponseException.Code.NOT_FOUND, exception.getCode());
+        assertEquals(ResponseException.Code.BAD_REQUEST, exception.getCode());
     }
 }
