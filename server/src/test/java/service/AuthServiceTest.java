@@ -55,7 +55,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void generateSessionBadInput() throws ResponseException {
+    void generateSessionBadInput() {
         ResponseException exception = assertThrows(
                 ResponseException.class,
                 () -> authService.generateSession(null)
