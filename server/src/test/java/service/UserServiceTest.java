@@ -87,8 +87,4 @@ class UserServiceTest {
         );
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
-
-    @Test
-    void logout() {
-    }
 }
