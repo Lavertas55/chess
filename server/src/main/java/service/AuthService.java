@@ -58,7 +58,7 @@ public class AuthService {
             authDAO.deleteAuth(authToken);
         }
         catch (DataNotFoundException e) {
-            return;
+            // if the session does not exist then fail silently
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
