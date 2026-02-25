@@ -63,4 +63,16 @@ class AuthServiceTest {
 
         assertEquals(ResponseException.Code.BAD_REQUEST, exception.getCode());
     }
+
+    @Test
+    void closeSessionValid() throws ResponseException, DataException {
+        authDAO.createAuth(validAuth);
+
+        authService.closeSession(validAuth.authToken());
+    }
+
+    @Test
+    void closeSessionInvalid() throws ResponseException {
+        authService.closeSession("1234");
+    }
 }

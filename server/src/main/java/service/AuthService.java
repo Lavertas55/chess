@@ -52,4 +52,16 @@ public class AuthService {
     private String generateToken() {
         return UUID.randomUUID().toString();
     }
+
+    public void closeSession(String authToken) throws ResponseException {
+        try {
+            authDAO.deleteAuth(authToken);
+        }
+        catch (DataNotFoundException e) {
+            return;
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+    }
 }
