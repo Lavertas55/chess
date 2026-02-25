@@ -8,8 +8,6 @@ import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
-import org.eclipse.jetty.server.Response;
-import org.eclipse.jetty.util.log.Log;
 import request.LoginRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
