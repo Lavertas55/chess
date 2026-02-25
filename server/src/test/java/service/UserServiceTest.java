@@ -2,7 +2,9 @@ package service;
 
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
+import dataaccess.exception.DataException;
 import exception.ResponseException;
+import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,9 @@ class UserServiceTest {
 
     private static UserService userService;
     private static RegisterRequest validRegister;
+    private static UserData validUser;
+    private MemoryAuthDAO authDAO;
+    private MemoryUserDAO userDAO;
 
     @BeforeAll
     static void init() {
@@ -25,35 +30,33 @@ class UserServiceTest {
         String email = "test@yahoo.com";
 
         validRegister = new RegisterRequest(username, password, email);
+        validUser = new UserData(username, password, email);
     }
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(new MemoryAuthDAO(), new MemoryUserDAO());
+        authDAO = new MemoryAuthDAO();
+        userDAO = new MemoryUserDAO();
+        userService = new UserService(authDAO, userDAO);
     }
 
     @Test
-    void register() throws ResponseException {
-        RegisterRequest registerRequest = new RegisterRequest(
-                validRegister.username(),
-                validRegister.password(),
-                validRegister.email()
-        );
-
-        RegisterResponse actual = userService.register(registerRequest);
+    void register() throws ResponseException, DataException {
+        RegisterResponse actual = userService.register(validRegister);
 
         assertEquals(validRegister.username(), actual.username());
+        assertEquals(validUser, userDAO.getUser(validRegister.username()));
 
         ResponseException exception = assertThrows(
                 ResponseException.class,
-                () -> userService.register(registerRequest)
+                () -> userService.register(validRegister)
         );
 
         assertEquals(ResponseException.Code.FORBIDDEN, exception.getCode());
     }
 
     @Test
-    void login() throws ResponseException {
+    void login() throws ResponseException, DataException {
         userService.register(validRegister);
 
         LoginRequest loginRequest = new LoginRequest(
@@ -64,6 +67,7 @@ class UserServiceTest {
         LoginResponse actual = userService.login(loginRequest);
 
         assertEquals(validRegister.username(), actual.username());
+        assertEquals(validRegister.username(), authDAO.getAuth(actual.authToken()).username());
 
         ResponseException exception = assertThrows(
                 ResponseException.class,
