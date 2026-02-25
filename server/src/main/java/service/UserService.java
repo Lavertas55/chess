@@ -6,27 +6,21 @@ import dataaccess.exception.DataConflictException;
 import dataaccess.exception.DataException;
 import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
-import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
 import request.RegisterRequest;
-import response.LoginResponse;
-import response.RegisterResponse;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class UserService {
 
-    private final AuthDAO authDAO;
     private final UserDAO userDAO;
 
-    public UserService(AuthDAO authDAO, UserDAO userDAO) {
-        this.authDAO = authDAO;
+    public UserService(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
 
-    public RegisterResponse register(RegisterRequest registerRequest) throws ResponseException {
+    public String register(RegisterRequest registerRequest) throws ResponseException {
         UserData userData = new UserData(
                 registerRequest.username(),
                 registerRequest.password(),
@@ -47,23 +41,10 @@ public class UserService {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
 
-        AuthData authData = new AuthData(
-                userData.username(),
-                generateToken()
-        );
-
-        // Create a session
-        try {
-            authDAO.createAuth(authData);
-        }
-        catch (DataException e) {
-            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
-        }
-
-        return new RegisterResponse(authData.username(), authData.authToken());
+        return userData.username();
     }
 
-    public LoginResponse login(LoginRequest loginRequest) throws ResponseException {
+    public String login(LoginRequest loginRequest) throws ResponseException {
         String username = loginRequest.username();
 
         try {
@@ -80,29 +61,6 @@ public class UserService {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
 
-        AuthData authData = new AuthData(
-                loginRequest.username(),
-                generateToken()
-        );
-
-        try {
-            authDAO.createAuth(authData);
-        }
-        catch (DataException e) {
-            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
-        }
-
-        return new LoginResponse(
-                authData.username(),
-                authData.authToken()
-        );
-    }
-
-    private String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
-    public void logout(String authToken) {
-        throw new RuntimeException("not implemented");
+        return username;
     }
 }
