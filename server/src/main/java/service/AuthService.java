@@ -18,7 +18,7 @@ public class AuthService {
 
     public boolean isValidToken(String authToken) throws ResponseException {
         try {
-            AuthData authData = authDAO.getAuth(authToken);
+            authDAO.getAuth(authToken);
         }
         catch (DataNotFoundException e) {
             return false;
