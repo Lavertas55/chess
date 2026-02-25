@@ -37,11 +37,16 @@ class UserServiceTest {
     }
 
     @Test
-    void register() throws ResponseException, DataException {
+    void registerNewUser() throws ResponseException, DataException {
         String actual = userService.register(validRegister);
 
         assertEquals(validRegister.username(), actual);
         assertEquals(validUser, userDAO.getUser(validRegister.username()));
+    }
+
+    @Test
+    void registerExistingUser() throws ResponseException {
+        userService.register(validRegister);
 
         ResponseException exception = assertThrows(
                 ResponseException.class,
@@ -52,8 +57,8 @@ class UserServiceTest {
     }
 
     @Test
-    void login() throws ResponseException {
-        userService.register(validRegister);
+    void loginValid() throws ResponseException, DataException {
+        userDAO.createUser(validUser);
 
         LoginRequest loginRequest = new LoginRequest(
                 validRegister.username(),
@@ -63,14 +68,20 @@ class UserServiceTest {
         String actual = userService.login(loginRequest);
 
         assertEquals(validRegister.username(), actual);
+    }
 
+    @Test
+    void loginBadUsername() {
         ResponseException exception = assertThrows(
                 ResponseException.class,
                 () -> userService.login(new LoginRequest("bad user", "1234"))
         );
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
 
-        exception = assertThrows(
+    @Test
+    void loginBadPassword() {
+        ResponseException exception = assertThrows(
                 ResponseException.class,
                 () -> userService.login(new LoginRequest(validRegister.username(), "bad password"))
         );
