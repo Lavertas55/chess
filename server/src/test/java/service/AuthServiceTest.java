@@ -72,7 +72,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void closeSessionInvalid() throws ResponseException {
+    void closeSessionInvalid() {
         ResponseException exception = assertThrows(
                 ResponseException.class,
                 () -> authService.closeSession("1234")
