@@ -32,7 +32,7 @@ public class AuthService {
 
     public String generateSession(String username) throws ResponseException {
         if (username == null) {
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "username cannot be null.");
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "bad request");
         }
 
         String authToken = generateToken();
@@ -58,7 +58,7 @@ public class AuthService {
             authDAO.deleteAuth(authToken);
         }
         catch (DataNotFoundException e) {
-            // if the session does not exist then fail silently
+            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "unauthorized");
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
