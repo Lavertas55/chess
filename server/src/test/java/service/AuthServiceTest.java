@@ -73,6 +73,11 @@ class AuthServiceTest {
 
     @Test
     void closeSessionInvalid() throws ResponseException {
-        authService.closeSession("1234");
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> authService.closeSession("1234")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
 }
