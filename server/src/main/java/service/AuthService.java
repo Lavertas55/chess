@@ -30,7 +30,7 @@ public class AuthService {
         return true;
     }
 
-    public String generateSession(String username) throws ResponseException {
+    public AuthData generateSession(String username) throws ResponseException {
         if (username == null) {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "bad request");
         }
@@ -46,7 +46,7 @@ public class AuthService {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
 
-        return authToken;
+        return new AuthData(username, authToken);
     }
 
     private String generateToken() {

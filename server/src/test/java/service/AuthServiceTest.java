@@ -47,11 +47,9 @@ class AuthServiceTest {
 
     @Test
     void generateSession() throws DataException, ResponseException {
-        String authToken = authService.generateSession(validAuth.username());
+        AuthData authData = authService.generateSession(validAuth.username());
 
-        AuthData testAuth = new AuthData(validAuth.username(), authToken);
-
-        assertEquals(testAuth, authDAO.getAuth(authToken));
+        assertEquals(authData, authDAO.getAuth(authData.authToken()));
     }
 
     @Test
