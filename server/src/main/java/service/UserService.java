@@ -7,7 +7,6 @@ import dataaccess.exception.DataException;
 import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.UserData;
-import request.LoginRequest;
 
 import java.util.Objects;
 
