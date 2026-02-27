@@ -8,7 +8,6 @@ import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.UserData;
 import request.LoginRequest;
-import request.RegisterRequest;
 
 import java.util.Objects;
 
@@ -20,14 +19,7 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public String register(RegisterRequest registerRequest) throws ResponseException {
-        UserData userData = new UserData(
-                registerRequest.username(),
-                registerRequest.password(),
-                registerRequest.email()
-        );
-
-        // Add the user
+    public String register(UserData userData) throws ResponseException {
         try {
             userDAO.createUser(userData);
         }
