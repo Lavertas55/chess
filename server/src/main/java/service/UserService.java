@@ -52,4 +52,8 @@ public class UserService {
 
         return username;
     }
+
+    public void clearUsers() {
+        userDAO.clear();
+    }
 }

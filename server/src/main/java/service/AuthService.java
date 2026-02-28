@@ -64,4 +64,8 @@ public class AuthService {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
     }
+
+    public void clearAuth() {
+        authDAO.clear();
+    }
 }
