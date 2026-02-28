@@ -2,10 +2,14 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.GameDAO;
+import dataaccess.exception.BadDataException;
+import dataaccess.exception.DataException;
+import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.GameData;
-import response.CreateGameResponse;
 import response.ListGamesResponse;
+
+import java.util.Collection;
 
 public class GameService {
 
@@ -15,8 +19,20 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
 
-    public CreateGameResponse createGame(GameData newGame) throws ResponseException {
-        throw new RuntimeException("not implemented");
+    public int createGame(String gameName) throws ResponseException {
+        GameData gameData;
+
+        try {
+            gameData = gameDAO.createGame(gameName);
+        }
+        catch (BadDataException e) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+
+        return gameData.gameID();
     }
 
     public ListGamesResponse listGames() throws ResponseException {
