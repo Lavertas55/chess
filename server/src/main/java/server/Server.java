@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
 import dataaccess.MemoryUserDAO;
 import exception.ResponseException;
 import io.javalin.*;
@@ -10,6 +11,7 @@ import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
 import service.AuthService;
+import service.GameService;
 import service.UserService;
 
 import java.util.Map;
@@ -19,6 +21,7 @@ public class Server {
     private final Javalin javalin;
     private final AuthService authService;
     private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
@@ -32,6 +35,7 @@ public class Server {
                 .exception(ResponseException.class, this::exceptionHandler);
         authService = new AuthService(new MemoryAuthDAO());
         userService = new UserService(new MemoryUserDAO());
+        gameService = new GameService(new MemoryGameDAO());
     }
 
     public int run(int desiredPort) {
@@ -44,7 +48,9 @@ public class Server {
     }
 
     private void clearData(Context ctx) {
-        throw new RuntimeException("not implemented");
+        authService.clearAuth();
+        userService.clearUsers();
+        gameService.clearGames();
     }
 
     private void registerUser(Context ctx) throws ResponseException {
