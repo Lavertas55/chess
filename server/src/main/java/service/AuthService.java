@@ -56,7 +56,19 @@ public class AuthService {
             authDAO.deleteAuth(authToken);
         }
         catch (DataNotFoundException e) {
-            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "unauthorized");
+            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Unauthorized");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public String getUsername(String authToken) throws ResponseException {
+        try {
+            return authDAO.getAuth(authToken).username();
+        }
+        catch (DataNotFoundException e) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
