@@ -39,7 +39,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void validateInvalidToken() throws ResponseException, DataException {
+    void validateInvalidToken() throws DataException {
         authDAO.createAuth(validAuth);
 
         ResponseException exception = assertThrows(
