@@ -110,8 +110,15 @@ public class Server {
         ctx.result(body);
     }
 
-    private void joinGame(Context ctx) {
-        throw new RuntimeException("not implemented");
+    private void joinGame(Context ctx) throws ResponseException {
+        String authToken = ctx.header("authorization");
+
+        authService.verifySession(authToken);
+
+        JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+        String username = authService.getUsername(authToken);
+
+        gameService.joinGame(joinGameRequest.gameID(), joinGameRequest.playerColor(), username);
     }
 
     private void exceptionHandler(ResponseException e, Context ctx) {
