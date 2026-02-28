@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import dataaccess.exception.*;
 import model.GameData;
 
@@ -50,32 +51,28 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGameWhiteUser(int gameID, String whiteUsername) throws DataException {
+    public void updateGameUser(int gameID, ChessGame.TeamColor teamColor, String username) throws DataException {
         GameData game = getGame(gameID);
 
-        GameData updatedGame = new GameData(
-                game.gameID(),
-                whiteUsername,
-                game.blackUsername(),
-                game.gameName(),
-                game.gameString()
-        );
+        GameData updatedGame;
 
-        gameStorage.replace(gameID, updatedGame);
-    }
-
-    @Override
-    public void updateGameBlackUser(int gameID, String blackUsername) throws DataException {
-        GameData game = getGame(gameID);
-
-        GameData updatedGame = new GameData(
-                game.gameID(),
-                game.whiteUsername(),
-                blackUsername,
-                game.gameName(),
-                game.gameString()
-        );
-
+        switch (teamColor) {
+            case WHITE -> updatedGame = new GameData(
+                                game.gameID(),
+                                username,
+                                game.blackUsername(),
+                                game.gameName(),
+                                game.gameString()
+                        );
+            case BLACK -> updatedGame = new GameData(
+                                game.gameID(),
+                                game.whiteUsername(),
+                                username,
+                                game.gameName(),
+                                game.gameString()
+                        );
+            default -> throw new BadDataException("color must be WHITE or BLACK");
+        };
         gameStorage.replace(gameID, updatedGame);
     }
 

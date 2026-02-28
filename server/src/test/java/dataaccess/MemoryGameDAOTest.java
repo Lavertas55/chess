@@ -56,30 +56,22 @@ public class MemoryGameDAOTest {
         assertEquals(gameList, memoryDAO.listGames());
     }
 
-    @Test
-    void testUpdateWhiteUser() throws DataException {
-        memoryDAO.createGame(validGame);
+    @ParameterizedTest
+    @EnumSource(ChessGame.TeamColor.class)
+    void testUpdateUser(ChessGame.TeamColor teamColor) throws DataException {
+        GameData gameData = memoryDAO.createGame(validGame.gameName());
 
         String newUsername = "new username";
-        memoryDAO.updateGameWhiteUser(0, newUsername);
+        memoryDAO.updateGameUser(gameData.gameID(), teamColor, newUsername);
 
-        GameData game = memoryDAO.getGame(0);
-        assertEquals(newUsername, game.whiteUsername());
+        GameData game = memoryDAO.getGame(gameData.gameID());
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameWhiteUser(1, newUsername));
-    }
+        switch (teamColor) {
+            case WHITE -> assertEquals(newUsername, game.whiteUsername());
+            case BLACK -> assertEquals(newUsername, game.blackUsername());
+        }
 
-    @Test
-    void testUpdateBlackUser() throws DataException {
-        memoryDAO.createGame(validGame);
-
-        String newUsername = "new username";
-        memoryDAO.updateGameBlackUser(0, newUsername);
-
-        GameData game = memoryDAO.getGame(0);
-        assertEquals(newUsername, game.blackUsername());
-
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameBlackUser(1, newUsername));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameUser(0, teamColor, newUsername));
     }
 
     @Test
