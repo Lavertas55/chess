@@ -72,8 +72,10 @@ public class Server {
         ctx.result(authData.toJson());
     }
 
-    private void logout(Context ctx) {
-        throw new RuntimeException("not implemented");
+    private void logout(Context ctx) throws ResponseException {
+        String authToken = ctx.header("authorization");
+
+        authService.closeSession(authToken);
     }
 
     private void listGames(Context ctx) {
