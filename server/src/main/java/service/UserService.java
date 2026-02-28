@@ -35,13 +35,11 @@ public class UserService {
         return userData.username();
     }
 
-    public String login(LoginRequest loginRequest) throws ResponseException {
-        String username = loginRequest.username();
-
+    public String login(String username, String password) throws ResponseException {
         try {
             UserData userData = userDAO.getUser(username);
 
-            if (!Objects.equals(userData.password(), loginRequest.password())) {
+            if (!Objects.equals(userData.password(), password)) {
                 throw new DataNotFoundException("Invalid Password");
             }
         }
