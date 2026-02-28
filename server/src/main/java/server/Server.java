@@ -60,6 +60,10 @@ public class Server {
         LoginRequest loginRequest = new Gson().fromJson(ctx.body(), LoginRequest.class);
 
         userService.login(loginRequest.username(), loginRequest.password());
+
+        AuthData authData = authService.generateSession(loginRequest.username());
+
+        ctx.result(authData.toJson());
     }
 
     private void logout(Context ctx) {
