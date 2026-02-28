@@ -12,6 +12,8 @@ import request.LoginRequest;
 import service.AuthService;
 import service.UserService;
 
+import java.util.Map;
+
 public class Server {
 
     private final Javalin javalin;
@@ -77,6 +79,11 @@ public class Server {
     }
 
     private void exceptionHandler(ResponseException e, Context ctx) {
-        throw new RuntimeException("not implemented");
+        String body = new Gson().toJson(
+                Map.of("message", String.format("Error: %s", e.getMessage()), "success", false)
+        );
+
+        ctx.status(e.toHttpStatusCode());
+        ctx.json(body);
     }
 }
