@@ -44,18 +44,18 @@ public class MemoryGameDAOTest {
 
     @Test
     void testGetGame() throws DataException {
-        memoryDAO.createGame(validGame);
+        GameData gameData = memoryDAO.createGame(validGame.gameName());
 
-        assertEquals(validGame, memoryDAO.getGame(0));
+        assertEquals(validGame, memoryDAO.getGame(gameData.gameID()));
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getGame(1));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.getGame(0));
     }
 
     @Test
     void testListGames() throws DataException {
-        memoryDAO.createGame(validGame);
+        GameData gameData = memoryDAO.createGame(validGame.gameName());
 
-        Collection<GameData> gameList = new HashSet<>(Set.of(validGame));
+        Collection<GameData> gameList = new HashSet<>(Set.of(gameData));
         assertEquals(gameList, memoryDAO.listGames());
     }
 
@@ -79,20 +79,20 @@ public class MemoryGameDAOTest {
 
     @Test
     void testUpdateGameString() throws DataException {
-        memoryDAO.createGame(validGame);
+        GameData gameData = memoryDAO.createGame(validGame.gameName());
 
         String newGameString = "new game string";
-        memoryDAO.updateGameString(0, newGameString);
+        memoryDAO.updateGameString(gameData.gameID(), newGameString);
 
-        GameData game = memoryDAO.getGame(0);
+        GameData game = memoryDAO.getGame(gameData.gameID());
         assertEquals(newGameString, game.gameString());
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameString(1, newGameString));
+        assertThrows(DataNotFoundException.class, () -> memoryDAO.updateGameString(0, newGameString));
     }
 
     @Test
     void testClear() throws DataException {
-        memoryDAO.createGame(validGame);
+        memoryDAO.createGame(validGame.gameName());
 
         memoryDAO.clear();
 
