@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class MemoryGameDAO implements GameDAO {
+
     private final HashMap<Integer, GameData> gameStorage = new HashMap<>();
+    private int nextGameID = 1;
 
     @Override
     public void createGame(GameData gameData) throws DataException {
