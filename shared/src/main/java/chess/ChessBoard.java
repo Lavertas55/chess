@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.Gson;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -111,6 +113,12 @@ public class ChessBoard {
 
         return row > 0 && row <= board.length && col > 0 && col <= board[row-1].length;
     }
+
+
+    public String toJson() {
+        return new Gson().toJson(board);
+    }
+
 
     @Override
     public boolean equals(Object o) {
