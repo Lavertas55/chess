@@ -36,15 +36,21 @@ public class UserService {
     }
 
     public String login(String username, String password) throws ResponseException {
+        if (username == null || password == null) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
+        }
+
+        UserData userData;
+
         try {
-            UserData userData = userDAO.getUser(username);
+            userData = userDAO.getUser(username);
 
             if (!Objects.equals(userData.password(), password)) {
-                throw new DataNotFoundException("Invalid Password");
+                throw new DataNotFoundException("password mismatch");
             }
         }
         catch (DataNotFoundException e) {
-            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Invalid Credentials");
+            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Unauthorized");
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
