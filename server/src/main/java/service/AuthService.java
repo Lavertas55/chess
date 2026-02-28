@@ -16,18 +16,16 @@ public class AuthService {
         this.authDAO = authDAO;
     }
 
-    public boolean isValidToken(String authToken) throws ResponseException {
+    public void verifySession(String authToken) throws ResponseException {
         try {
             authDAO.getAuth(authToken);
         }
         catch (DataNotFoundException e) {
-            return false;
+            throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Unauthorized");
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
-
-        return true;
     }
 
     public AuthData generateSession(String username) throws ResponseException {

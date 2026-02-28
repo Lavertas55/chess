@@ -35,14 +35,19 @@ class AuthServiceTest {
     void validateValidToken() throws ResponseException, DataException {
         authDAO.createAuth(validAuth);
 
-        assert(authService.isValidToken(validAuth.authToken()));
+        authService.verifySession(validAuth.authToken());
     }
 
     @Test
     void validateInvalidToken() throws ResponseException, DataException {
         authDAO.createAuth(validAuth);
 
-        assert(!authService.isValidToken("1234"));
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> authService.verifySession("1234")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
 
     @Test
