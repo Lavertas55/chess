@@ -23,10 +23,10 @@ public class UserService {
             userDAO.createUser(userData);
         }
         catch (BadDataException e) {
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, e.getMessage());
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
         }
         catch (DataConflictException e) {
-            throw new ResponseException(ResponseException.Code.FORBIDDEN, e.getMessage());
+            throw new ResponseException(ResponseException.Code.FORBIDDEN, "Forbidden");
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
