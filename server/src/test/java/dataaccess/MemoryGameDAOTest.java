@@ -19,25 +19,24 @@ public class MemoryGameDAOTest {
     static void init() {
         memoryDAO = new MemoryGameDAO();
 
-        String whiteUsername = "white user 0";
-        String blackUsername = "black user 0";
-        String gameName = "game 0";
-        String gameString = "Game Info";
+        String whiteUsername = null;
+        String blackUsername = null;
+        String gameName = "game 1";
+        String gameString = new ChessGame().getBoard().toJson();
 
-        validGame = new GameData(0, whiteUsername, blackUsername, gameName, gameString);
+        validGame = new GameData(1, whiteUsername, blackUsername, gameName, gameString);
     }
 
     @BeforeEach
     void setup() {
-        memoryDAO.clear();
+        memoryDAO = new MemoryGameDAO();
     }
 
     @Test
     void testCreateGame() throws DataException {
-        memoryDAO.createGame(validGame);
+        memoryDAO.createGame(validGame.gameName());
 
         assertThrows(BadDataException.class, () -> memoryDAO.createGame(null));
-        assertThrows(DataConflictException.class, () -> memoryDAO.createGame(validGame));
     }
 
     @Test

@@ -13,17 +13,22 @@ public class MemoryGameDAO implements GameDAO {
     private int nextGameID = 1;
 
     @Override
-    public void createGame(GameData gameData) throws DataException {
-        if (gameData == null) {
-            throw new BadDataException("gameData cannot be null.");
+    public GameData createGame(String gameName) throws DataException {
+        if (gameName == null) {
+            throw new BadDataException("gameName cannot be null.");
         }
 
-        int gameID = gameData.gameID();
-        if (hasGameID(gameID)) {
-            throw new DataConflictException(String.format("gameID = %d already in use.", gameID));
-        }
+        GameData gameData = new GameData(
+                nextGameID++,
+                null,
+                null,
+                gameName,
+                new ChessGame().getBoard().toJson()
+        );
 
         gameStorage.put(gameData.gameID(), gameData);
+
+        return gameData;
     }
 
     @Override
