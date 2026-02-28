@@ -72,7 +72,7 @@ public class MemoryGameDAO implements GameDAO {
                                 game.gameString()
                         );
             default -> throw new BadDataException("color must be WHITE or BLACK");
-        };
+        }
         gameStorage.replace(gameID, updatedGame);
     }
 
