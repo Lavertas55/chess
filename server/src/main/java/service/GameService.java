@@ -36,11 +36,25 @@ public class GameService {
     }
 
     public ListGamesResponse listGames() throws ResponseException {
-        throw new RuntimeException("not implemented");
+        Collection<GameData> games = gameDAO.listGames();
+
+        return new ListGamesResponse(games);
     }
 
-    public void joinGame(ChessGame.TeamColor color, String username, int gameID) throws ResponseException {
-        throw new RuntimeException("not implemented");
+    public void joinGame(int gameID, ChessGame.TeamColor color, String username) throws ResponseException {
+        try {
+            if (gameDAO.getGameUser(gameID, color) != null){
+                throw new ResponseException(ResponseException.Code.FORBIDDEN, "Forbidden");
+            }
+
+            gameDAO.updateGameUser(gameID, color, username);
+        }
+        catch (BadDataException | DataNotFoundException e) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
     }
 
     public void clearGames() {
