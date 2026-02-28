@@ -10,6 +10,7 @@ import io.javalin.http.Context;
 import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
+import response.ListGamesResponse;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -78,8 +79,18 @@ public class Server {
         authService.closeSession(authToken);
     }
 
-    private void listGames(Context ctx) {
-        throw new RuntimeException("not implemented");
+    private void listGames(Context ctx) throws ResponseException {
+        String authToken = ctx.header("authorization");
+
+        authService.verifySession(authToken);
+
+        ListGamesResponse listGamesResponse = gameService.listGames();
+
+        String body = new Gson().toJson(
+                Map.of("games", listGamesResponse.games())
+        );
+
+        ctx.result(body);
     }
 
     private void createGame(Context ctx) {
