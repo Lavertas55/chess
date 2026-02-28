@@ -9,6 +9,8 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
 import model.UserData;
+import request.CreateGameRequest;
+import request.JoinGameRequest;
 import request.LoginRequest;
 import response.ListGamesResponse;
 import service.AuthService;
@@ -93,8 +95,19 @@ public class Server {
         ctx.result(body);
     }
 
-    private void createGame(Context ctx) {
-        throw new RuntimeException("not implemented");
+    private void createGame(Context ctx) throws ResponseException {
+        String authToken = ctx.header("authorization");
+
+        authService.verifySession(authToken);
+
+        CreateGameRequest createGameRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+        int gameID = gameService.createGame(createGameRequest.gameName());
+
+        String body = new Gson().toJson(
+                Map.of("gameID", gameID)
+        );
+
+        ctx.result(body);
     }
 
     private void joinGame(Context ctx) {
