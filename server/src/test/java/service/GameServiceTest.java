@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import response.CreateGameResponse;
 import response.ListGamesResponse;
 
 import java.util.HashSet;
@@ -60,7 +59,7 @@ class GameServiceTest {
     }
 
     @Test
-    void listGames() throws ResponseException, DataException {
+    void listGames() throws DataException {
         gameDAO.createGame(validGame.gameName());
 
         ListGamesResponse listGamesResponse = gameService.listGames();
@@ -79,7 +78,7 @@ class GameServiceTest {
 
     @ParameterizedTest
     @EnumSource(ChessGame.TeamColor.class)
-    void joinGameAlreadyTaken(ChessGame.TeamColor color) throws ResponseException, DataException {
+    void joinGameAlreadyTaken(ChessGame.TeamColor color) throws DataException {
         gameDAO.createGame(validGame.gameName());
 
         gameDAO.updateGameUser(validGame.gameID(), color, "color taken");
