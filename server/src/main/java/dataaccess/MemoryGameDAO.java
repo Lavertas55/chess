@@ -77,6 +77,24 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
+    public String getGameUser(int gameID, ChessGame.TeamColor teamColor) throws DataException {
+        if (teamColor == null) {
+            throw new BadDataException("color cannot be null");
+        }
+
+        GameData game = getGame(gameID);
+        String username;
+
+        switch (teamColor) {
+            case WHITE -> username = game.whiteUsername();
+            case BLACK -> username = game.blackUsername();
+            default -> throw new BadDataException("color cannot be null");
+        }
+
+        return username;
+    }
+
+    @Override
     public void updateGameString(int gameID, String gameString) throws DataException {
         GameData game = getGame(gameID);
 
