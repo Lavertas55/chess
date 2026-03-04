@@ -5,67 +5,109 @@ import model.AuthData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MemoryAuthDAOTest {
 
-    private static MemoryAuthDAO memoryDAO;
     private static AuthData validAuth;
+
+    private AuthDAO getAuthDAO(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO;
+        if (dbClass.equals(MySQLAuthDAO.class)) {
+            authDAO = new MySQLAuthDAO();
+        }
+        else {
+            authDAO = new MemoryAuthDAO();
+        }
+        authDAO.clear();
+        return authDAO;
+    }
 
     @BeforeAll
     static void init() {
-        memoryDAO = new MemoryAuthDAO();
-
         String authToken = "1234";
         String username = "test";
 
         validAuth = new AuthData(username, authToken);
     }
 
-    @BeforeEach
-    void setup() {
-        memoryDAO.clear();
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void createAuthValid(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
+
+        assertDoesNotThrow(() -> authDAO.createAuth(validAuth));
+
+        assertThrows(DataConflictException.class, () -> authDAO.createAuth(validAuth));
     }
 
-    @Test
-    void createAuth() throws DataException {
-        String newAuthToken = "1111";
-        String username = "new auth";
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void createAuthNull(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
 
-        AuthData newAuth = new AuthData(username, newAuthToken);
-        memoryDAO.createAuth(newAuth);
-
-        assertThrows(BadDataException.class, () -> memoryDAO.createAuth(null));
-        assertThrows(DataConflictException.class, () -> memoryDAO.createAuth(newAuth));
+        assertThrows(BadDataException.class, () -> authDAO.createAuth(null));
     }
 
-    @Test
-    void getAuth() throws DataException {
-        memoryDAO.createAuth(validAuth);
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void createAuthExistingUser(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
 
-        assertEquals(validAuth, memoryDAO.getAuth(validAuth.authToken()));
-
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getAuth(null));
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getAuth("1111"));
+        assertDoesNotThrow(() -> authDAO.createAuth(validAuth));
+        assertThrows(DataConflictException.class, () -> authDAO.createAuth(validAuth));
     }
 
-    @Test
-    void deleteAuth() throws DataException {
-        memoryDAO.createAuth(validAuth);
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void getAuthValid(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
 
-        memoryDAO.deleteAuth(validAuth.authToken());
+        authDAO.createAuth(validAuth);
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.deleteAuth(null));
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.deleteAuth("1111"));
+        assertEquals(validAuth, authDAO.getAuth(validAuth.authToken()));
     }
 
-    @Test
-    void clear() throws DataException {
-        memoryDAO.createAuth(validAuth);
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void getAuthNotFound(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
 
-        memoryDAO.clear();
+        assertThrows(DataNotFoundException.class, () -> authDAO.getAuth(null));
+        assertThrows(DataNotFoundException.class, () -> authDAO.getAuth("1111"));
+    }
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getAuth(validAuth.authToken()));
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void deleteAuthValid(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
+
+        authDAO.createAuth(validAuth);
+
+        assertDoesNotThrow(() -> authDAO.deleteAuth(validAuth.authToken()));
+        assertThrows(DataNotFoundException.class, () -> authDAO.getAuth(validAuth.authToken()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void deleteAuthNotFound(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
+
+        assertThrows(DataNotFoundException.class, () -> authDAO.deleteAuth(null));
+        assertThrows(DataNotFoundException.class, () -> authDAO.deleteAuth("1111"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryAuthDAO.class, MySQLAuthDAO.class})
+    void clear(Class<? extends AuthDAO> dbClass) throws DataException {
+        AuthDAO authDAO = getAuthDAO(dbClass);
+
+        authDAO.createAuth(validAuth);
+
+        assertDoesNotThrow(authDAO::clear);
+        assertThrows(DataNotFoundException.class, () -> authDAO.getAuth(validAuth.authToken()));
     }
 }
