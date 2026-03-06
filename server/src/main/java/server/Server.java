@@ -8,11 +8,12 @@ import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
-import model.UserData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
+import request.RegisterRequest;
 import response.ListGamesResponse;
+import response.LoginResponse;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -50,29 +51,34 @@ public class Server {
         javalin.stop();
     }
 
-    private void clearData(Context ctx) {
+    private void clearData(Context ctx) throws ResponseException {
         authService.clearAuth();
         userService.clearUsers();
         gameService.clearGames();
     }
 
     private void registerUser(Context ctx) throws ResponseException {
-        UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
-        String username = userService.register(userData);
+        RegisterRequest registerRequest = new Gson().fromJson(ctx.body(), RegisterRequest.class);
+        int userID = userService.register(registerRequest);
 
-        AuthData authData = authService.generateSession(username);
+        AuthData authData = authService.generateSession(userID);
 
-        ctx.result(authData.toJson());
+        LoginResponse loginResponse = new LoginResponse(registerRequest.username(), authData.authToken());
+
+        ctx.result(loginResponse.toJson());
     }
 
     private void login(Context ctx) throws ResponseException {
         LoginRequest loginRequest = new Gson().fromJson(ctx.body(), LoginRequest.class);
 
-        userService.login(loginRequest.username(), loginRequest.password());
+        userService.verifyPassword(loginRequest.username(), loginRequest.password());
+        int userID = userService.getUserID(loginRequest.username());
 
-        AuthData authData = authService.generateSession(loginRequest.username());
+        AuthData authData = authService.generateSession(userID);
 
-        ctx.result(authData.toJson());
+        LoginResponse loginResponse = new LoginResponse(loginRequest.username(), authData.authToken());
+
+        ctx.result(loginResponse.toJson());
     }
 
     private void logout(Context ctx) throws ResponseException {
@@ -116,7 +122,9 @@ public class Server {
         authService.verifySession(authToken);
 
         JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
-        String username = authService.getUsername(authToken);
+
+        int userID = authService.getUserID(authToken);
+        String username = userService.getUsername(userID);
 
         gameService.joinGame(joinGameRequest.gameID(), joinGameRequest.playerColor(), username);
     }
