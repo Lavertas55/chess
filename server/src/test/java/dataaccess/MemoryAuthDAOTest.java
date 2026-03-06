@@ -3,8 +3,6 @@ package dataaccess;
 import dataaccess.exception.*;
 import model.AuthData;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -17,6 +15,7 @@ class MemoryAuthDAOTest {
     private AuthDAO getAuthDAO(Class<? extends AuthDAO> dbClass) throws DataException {
         AuthDAO authDAO;
         if (dbClass.equals(MySQLAuthDAO.class)) {
+            DatabaseManager.createDatabase();
             authDAO = new MySQLAuthDAO();
         }
         else {
@@ -29,9 +28,9 @@ class MemoryAuthDAOTest {
     @BeforeAll
     static void init() {
         String authToken = "1234";
-        String username = "test";
+        int userID = 1;
 
-        validAuth = new AuthData(username, authToken);
+        validAuth = new AuthData(userID, authToken);
     }
 
     @ParameterizedTest
