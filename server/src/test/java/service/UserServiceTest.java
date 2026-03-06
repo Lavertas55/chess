@@ -8,6 +8,7 @@ import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import request.RegisterRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,14 +17,17 @@ class UserServiceTest {
     private static UserService userService;
     private static UserData validUser;
     private static UserDAO userDAO;
+    private static RegisterRequest registerRequest;
 
     @BeforeAll
     static void init() {
+        int userID = 1;
         String username = "test";
         String password = "1234";
         String email = "test@yahoo.com";
 
-        validUser = new UserData(username, password, email);
+        validUser = new UserData(userID, username, password, email);
+        registerRequest = new RegisterRequest(username, password, email);
     }
 
     @BeforeEach
@@ -34,47 +38,45 @@ class UserServiceTest {
 
     @Test
     void registerNewUser() throws ResponseException, DataException {
-        String actual = userService.register(validUser);
+        int actual = userService.register(registerRequest);
 
-        assertEquals(validUser.username(), actual);
+        assertEquals(validUser.userID(), actual);
         assertEquals(validUser, userDAO.getUser(validUser.username()));
     }
 
     @Test
     void registerExistingUser() throws ResponseException {
-        userService.register(validUser);
+        userService.register(registerRequest);
 
         ResponseException exception = assertThrows(
                 ResponseException.class,
-                () -> userService.register(validUser)
+                () -> userService.register(registerRequest)
         );
 
         assertEquals(ResponseException.Code.FORBIDDEN, exception.getCode());
     }
 
     @Test
-    void loginValid() throws ResponseException, DataException {
-        userDAO.createUser(validUser);
+    void verifyPasswordValid() throws ResponseException, DataException {
+        userDAO.createUser(registerRequest);
 
-        String actual = userService.login(validUser.username(), validUser.password());
-
-        assertEquals(validUser.username(), actual);
+        assertDoesNotThrow(() -> userService.verifyPassword(validUser.username(), validUser.password()));
     }
 
     @Test
-    void loginBadUsername() {
+    void verifyPasswordBadUsername() {
         ResponseException exception = assertThrows(
                 ResponseException.class,
-                () -> userService.login(validUser.username(), validUser.password())
+                () -> userService.verifyPassword(validUser.username(), validUser.password())
         );
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
 
     @Test
-    void loginBadPassword() {
+    void verifyPasswordBadPassword() {
         ResponseException exception = assertThrows(
                 ResponseException.class,
-                () -> userService.login(validUser.username(), "bad password")
+                () -> userService.verifyPassword(validUser.username(), "bad password")
         );
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
