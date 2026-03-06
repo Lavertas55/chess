@@ -1,5 +1,7 @@
 package dataaccess;
 
+import dataaccess.exception.DataAccessException;
+
 import java.sql.*;
 import java.util.Properties;
 
@@ -8,6 +10,35 @@ public class DatabaseManager {
     private static String dbUsername;
     private static String dbPassword;
     private static String connectionUrl;
+
+    private static final String[] CREATE_TABLE_STATEMENTS = {
+            """
+            CREATE TABLE IF NOT EXISTS user(
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                username VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS session(
+                auth_token VARCHAR(255) PRIMARY KEY NOT NULL,
+                user_id INT NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES user(id)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS game(
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                white_user_id INT,
+                black_user_id INT,
+                name VARCHAR(255) NOT NULL,
+                game_state VARCHAR(255) NOT NULL,
+                FOREIGN KEY(white_user_id) REFERENCES user(id),
+                FOREIGN KEY(black_user_id) REFERENCES user(id)
+            )
+            """
+    };
 
     /*
      * Load the database information for the db.properties file.
@@ -26,6 +57,20 @@ public class DatabaseManager {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("failed to create database", ex);
+        }
+
+        DatabaseManager.createTables();
+    }
+
+    static private void createTables() throws DataAccessException {
+        for (String statement : DatabaseManager.CREATE_TABLE_STATEMENTS) {
+
+            try (var conn = DatabaseManager.getConnection()) {
+                var preparedStatement = conn.prepareStatement(statement);
+                preparedStatement.executeUpdate();
+            } catch (SQLException ex) {
+                throw new DataAccessException("failed to create tables", ex);
+            }
         }
     }
 
