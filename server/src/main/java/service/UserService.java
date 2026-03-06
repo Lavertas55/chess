@@ -7,6 +7,7 @@ import dataaccess.exception.DataException;
 import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.UserData;
+import request.RegisterRequest;
 
 import java.util.Objects;
 
@@ -18,9 +19,9 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public String register(UserData userData) throws ResponseException {
+    public int register(RegisterRequest registerRequest) throws ResponseException {
         try {
-            userDAO.createUser(userData);
+            return userDAO.createUser(registerRequest).userID();
         }
         catch (BadDataException e) {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
@@ -31,19 +32,15 @@ public class UserService {
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
-
-        return userData.username();
     }
 
-    public String login(String username, String password) throws ResponseException {
+    public void verifyPassword(String username, String password) throws ResponseException {
         if (username == null || password == null) {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
         }
 
-        UserData userData;
-
         try {
-            userData = userDAO.getUser(username);
+            UserData userData = userDAO.getUser(username);
 
             if (!Objects.equals(userData.password(), password)) {
                 throw new DataNotFoundException("password mismatch");
@@ -55,11 +52,38 @@ public class UserService {
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
-
-        return username;
     }
 
-    public void clearUsers() {
-        userDAO.clear();
+    public String getUsername(int userID) throws ResponseException {
+        try {
+            return userDAO.getUser(userID).username();
+        }
+        catch (DataNotFoundException e) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "userID does not exist");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public int getUserID(String username) throws ResponseException {
+        try {
+            return userDAO.getUser(username).userID();
+        }
+        catch (DataNotFoundException e) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "username does not exist");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public void clearUsers() throws ResponseException {
+        try {
+            userDAO.clear();
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
     }
 }
