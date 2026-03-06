@@ -57,7 +57,12 @@ public class GameService {
         }
     }
 
-    public void clearGames() {
-        gameDAO.clear();
+    public void clearGames() throws ResponseException {
+        try {
+            gameDAO.clear();
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
     }
 }
