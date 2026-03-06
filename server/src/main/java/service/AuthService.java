@@ -28,14 +28,10 @@ public class AuthService {
         }
     }
 
-    public AuthData generateSession(String username) throws ResponseException {
-        if (username == null) {
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "bad request");
-        }
-
+    public AuthData generateSession(int userID) throws ResponseException {
         String authToken = generateToken();
 
-        AuthData authData = new AuthData(username, authToken);
+        AuthData authData = new AuthData(userID, authToken);
 
         try {
             authDAO.createAuth(authData);
@@ -44,7 +40,7 @@ public class AuthService {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
 
-        return new AuthData(username, authToken);
+        return new AuthData(userID, authToken);
     }
 
     private String generateToken() {
@@ -63,9 +59,9 @@ public class AuthService {
         }
     }
 
-    public String getUsername(String authToken) throws ResponseException {
+    public int getUserID(String authToken) throws ResponseException {
         try {
-            return authDAO.getAuth(authToken).username();
+            return authDAO.getAuth(authToken).userID();
         }
         catch (DataNotFoundException e) {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
@@ -75,7 +71,12 @@ public class AuthService {
         }
     }
 
-    public void clearAuth() {
-        authDAO.clear();
+    public void clearAuth() throws ResponseException {
+        try {
+            authDAO.clear();
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
     }
 }
