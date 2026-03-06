@@ -57,7 +57,7 @@ class UserServiceTest {
     }
 
     @Test
-    void verifyPasswordValid() throws ResponseException, DataException {
+    void verifyPasswordValid() throws DataException {
         userDAO.createUser(registerRequest);
 
         assertDoesNotThrow(() -> userService.verifyPassword(validUser.username(), validUser.password()));

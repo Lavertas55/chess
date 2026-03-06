@@ -2,7 +2,6 @@ package dataaccess;
 
 import dataaccess.exception.*;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import request.RegisterRequest;
 
 import java.util.HashMap;
