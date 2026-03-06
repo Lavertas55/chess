@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MemoryAuthDAOTest {
+class AuthDAOTest {
 
     private static AuthData validAuth;
 
