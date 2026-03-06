@@ -19,10 +19,10 @@ class AuthServiceTest {
 
     @BeforeAll
     static void init() {
-        String username = "test";
+        int userID = 1;
         String authToken = "1111";
 
-        validAuth = new AuthData(username, authToken);
+        validAuth = new AuthData(userID, authToken);
     }
 
     @BeforeEach
@@ -52,19 +52,9 @@ class AuthServiceTest {
 
     @Test
     void generateSession() throws DataException, ResponseException {
-        AuthData authData = authService.generateSession(validAuth.username());
+        AuthData authData = authService.generateSession(validAuth.userID());
 
         assertEquals(authData, authDAO.getAuth(authData.authToken()));
-    }
-
-    @Test
-    void generateSessionBadInput() {
-        ResponseException exception = assertThrows(
-                ResponseException.class,
-                () -> authService.generateSession(null)
-        );
-
-        assertEquals(ResponseException.Code.BAD_REQUEST, exception.getCode());
     }
 
     @Test
