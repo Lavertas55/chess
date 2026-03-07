@@ -28,10 +28,10 @@ public class MemoryUserDAO implements UserDAO {
             throw new DataConflictException(String.format("username %s is already in use.", username));
         }
 
-        String password = registerRequest.password();
+        String hashedPassword = UserDAO.hashPassword(registerRequest.password());
         String email = registerRequest.email();
 
-        UserData userData = new UserData(nextUserID++, username, password, email);
+        UserData userData = new UserData(nextUserID++, username, hashedPassword, email);
 
         userStorage.put(userData.userID(), userData);
         usernameToID.put(userData.username(), userData.userID());
