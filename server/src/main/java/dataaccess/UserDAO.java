@@ -13,4 +13,8 @@ public interface UserDAO extends DataAccessObject {
     static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
+
+    static boolean isPasswordEqual(String plainPassword, String hashedPassword) {
+        return BCrypt.checkpw(plainPassword, hashedPassword);
+    }
 }
