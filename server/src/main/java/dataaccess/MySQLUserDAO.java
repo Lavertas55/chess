@@ -1,9 +1,6 @@
 package dataaccess;
 
-import dataaccess.exception.BadDataException;
-import dataaccess.exception.DataAccessException;
-import dataaccess.exception.DataConflictException;
-import dataaccess.exception.DataException;
+import dataaccess.exception.*;
 import model.UserData;
 import request.RegisterRequest;
 
@@ -29,7 +26,7 @@ public class MySQLUserDAO implements UserDAO {
                     connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)
             ) {
                 String username = registerRequest.username();
-                String hashedPassword = hashPassword(registerRequest.password());
+                String hashedPassword = UserDAO.hashPassword(registerRequest.password());
                 String email = registerRequest.email();
 
                 preparedStatement.setString(1, username);
@@ -57,8 +54,29 @@ public class MySQLUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(int UserID) throws DataException {
-        throw new RuntimeException("not implemented");
+    public UserData getUser(int userID) throws DataException {
+        String statement = "SELECT * FROM user WHERE id = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setInt(1, userID);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        String username = resultSet.getString("username");
+                        String password = resultSet.getString("password");
+                        String email = resultSet.getString("email");
+
+                        return new UserData(userID, username, password, email);
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("failed to get user: %s", e.getMessage()));
+        }
+
+        throw new DataNotFoundException(String.format("userID %d not found", userID));
     }
 
     @Override
