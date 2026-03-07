@@ -10,7 +10,7 @@ import request.RegisterRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MemoryUserDAOTest {
+class UserDAOTest {
 
     private static UserData validUser;
     private static RegisterRequest registerRequest;
