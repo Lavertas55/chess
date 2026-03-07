@@ -29,7 +29,7 @@ class AuthDAOTest {
     }
 
     private void addUser() throws DataException {
-        String statement = "INSERT INTO user (username, password, email) VALUES (\"bob\", \"1234\", \"bob@byu.edu\")";
+        String statement = "INSERT IGNORE INTO user (username, password, email) VALUES (\"bob\", \"1234\", \"bob@byu.edu\")";
 
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
