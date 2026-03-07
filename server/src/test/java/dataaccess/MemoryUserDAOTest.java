@@ -3,22 +3,34 @@ package dataaccess;
 import dataaccess.exception.*;
 import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import request.RegisterRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MemoryUserDAOTest {
 
-    private static MemoryUserDAO memoryDAO;
     private static UserData validUser;
     private static RegisterRequest registerRequest;
 
+    private UserDAO getUserDAO(Class<? extends UserDAO> dbClass) throws DataException {
+        UserDAO userDAO;
+        if (dbClass.equals(MySQLUserDAO.class)) {
+            DatabaseManager.createDatabase();
+            userDAO = new MySQLUserDAO();
+        }
+        else {
+            userDAO = new MemoryUserDAO();
+        }
+
+        userDAO.clear();
+        return userDAO;
+    }
+
     @BeforeAll
     static void init() {
-        memoryDAO = new MemoryUserDAO();
-
         int userID = 1;
         String username = "valid";
         String password = "password";
@@ -28,35 +40,100 @@ class MemoryUserDAOTest {
         registerRequest = new RegisterRequest(username, password, email);
     }
 
-    @BeforeEach
-    void setup() {
-        memoryDAO.clear();
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+    void createUserValid(Class<? extends UserDAO> dbClass) throws DataException {
+        UserDAO userDAO = getUserDAO(dbClass);
+
+        assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
+
+        userDAO.clear();
     }
 
-    @Test
-    void createUser() throws DataException {
-        memoryDAO.createUser(registerRequest);
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+    void createUserNull(Class<? extends UserDAO> dbClass) throws DataException {
+        UserDAO userDAO = getUserDAO(dbClass);
 
-        assertThrows(BadDataException.class, () -> memoryDAO.createUser(null));
-        assertThrows(DataConflictException.class, () -> memoryDAO.createUser(registerRequest));
+        assertThrows(BadDataException.class, () -> userDAO.createUser(null));
+
+        userDAO.clear();
     }
 
-    @Test
-    void getUser() throws DataException {
-        memoryDAO.createUser(registerRequest);
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+    void createUserExisting(Class<? extends UserDAO> dbClass) throws DataException {
+        UserDAO userDAO = getUserDAO(dbClass);
 
-        assertEquals(validUser, memoryDAO.getUser(validUser.username()));
+        assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
+        assertThrows(DataConflictException.class, () -> userDAO.createUser(registerRequest));
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getUser(null));
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getUser("non-existent"));
+        userDAO.clear();
     }
 
-    @Test
-    void clear() throws DataException {
-        memoryDAO.createUser(registerRequest);
+    @Nested
+    class GetUser {
 
-        memoryDAO.clear();
+        @ParameterizedTest
+        @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+        void fromUsernameValid(Class<? extends UserDAO> dbClass) throws DataException {
+            UserDAO userDAO = getUserDAO(dbClass);
 
-        assertThrows(DataNotFoundException.class, () -> memoryDAO.getUser(validUser.username()));
+            assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
+            assertEquals(validUser, userDAO.getUser(validUser.username()));
+
+            userDAO.clear();
+        }
+
+        @ParameterizedTest
+        @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+        void fromUsernameNonExistent(Class<? extends UserDAO> dbClass) throws DataException {
+            UserDAO userDAO = getUserDAO(dbClass);
+
+            assertThrows(DataNotFoundException.class, () -> userDAO.getUser("non-existent"));
+
+            userDAO.clear();
+        }
+
+        @ParameterizedTest
+        @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+        void fromUserIDValid(Class<? extends UserDAO> dbClass) throws DataException {
+            UserDAO userDAO = getUserDAO(dbClass);
+
+            assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
+            assertEquals(validUser, userDAO.getUser(validUser.userID()));
+
+            userDAO.clear();
+        }
+
+        @ParameterizedTest
+        @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+        void fromUserIDNonExistent(Class<? extends UserDAO> dbClass) throws DataException {
+            UserDAO userDAO = getUserDAO(dbClass);
+
+            assertThrows(DataNotFoundException.class, () -> userDAO.getUser("non-existent"));
+
+            userDAO.clear();
+        }
+
+        @ParameterizedTest
+        @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+        void withNull(Class<? extends UserDAO> dbClass) throws DataException {
+            UserDAO userDAO = getUserDAO(dbClass);
+
+            assertThrows(DataNotFoundException.class, () -> userDAO.getUser(null));
+
+            userDAO.clear();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MemoryUserDAO.class, MySQLUserDAO.class})
+    void clear(Class<? extends UserDAO> dbClass) throws DataException {
+        UserDAO userDAO = getUserDAO(dbClass);
+
+        assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
+
+        assertDoesNotThrow(userDAO::clear);
     }
 }
