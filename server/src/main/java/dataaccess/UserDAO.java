@@ -10,7 +10,7 @@ public interface UserDAO extends DataAccessObject {
     UserData getUser(int userID) throws DataException;
     UserData getUser(String username) throws DataException;
 
-    default String hashPassword(String password) {
+    static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 }
