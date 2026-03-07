@@ -58,7 +58,21 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String authToken) throws DataException {
-        throw new RuntimeException("not implemented");
+        String statement = "DELETE FROM session WHERE auth_token = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, authToken);
+
+                int result = preparedStatement.executeUpdate();
+                if (result == 0) {
+                    throw new DataNotFoundException("authToken not in use");
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s", e.getMessage()));
+        }
     }
 
     @Override
