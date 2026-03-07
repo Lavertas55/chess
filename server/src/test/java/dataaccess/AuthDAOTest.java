@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.sql.SQLException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class AuthDAOTest {
@@ -16,6 +18,7 @@ class AuthDAOTest {
         AuthDAO authDAO;
         if (dbClass.equals(MySQLAuthDAO.class)) {
             DatabaseManager.createDatabase();
+            addUser();
             authDAO = new MySQLAuthDAO();
         }
         else {
@@ -23,6 +26,18 @@ class AuthDAOTest {
         }
         authDAO.clear();
         return authDAO;
+    }
+
+    private void addUser() throws DataException {
+        String statement = "INSERT INTO user (username, password, email) VALUES (\"bob\", \"1234\", \"bob@byu.edu\")";
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(String.format("failed to add user to database: %s", ex.getMessage()));
+        }
     }
 
     @BeforeAll
