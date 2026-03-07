@@ -1,6 +1,5 @@
 package dataaccess;
 
-import com.mysql.cj.x.protobuf.MysqlxPrepare;
 import dataaccess.exception.*;
 import model.AuthData;
 
