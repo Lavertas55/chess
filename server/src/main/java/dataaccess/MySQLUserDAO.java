@@ -12,7 +12,12 @@ import java.sql.*;
 public class MySQLUserDAO implements UserDAO {
     @Override
     public UserData createUser(RegisterRequest registerRequest) throws DataException {
-        if (registerRequest == null) {
+        if (
+                registerRequest == null ||
+                registerRequest.username() == null ||
+                registerRequest.password() == null ||
+                registerRequest.email() == null
+        ) {
             throw new BadDataException("registerRequest cannot be null");
         }
 
