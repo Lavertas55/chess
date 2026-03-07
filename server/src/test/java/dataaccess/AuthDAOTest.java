@@ -56,6 +56,8 @@ class AuthDAOTest {
         assertDoesNotThrow(() -> authDAO.createAuth(validAuth));
 
         assertThrows(DataConflictException.class, () -> authDAO.createAuth(validAuth));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
@@ -64,6 +66,8 @@ class AuthDAOTest {
         AuthDAO authDAO = getAuthDAO(dbClass);
 
         assertThrows(BadDataException.class, () -> authDAO.createAuth(null));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
@@ -73,6 +77,8 @@ class AuthDAOTest {
 
         assertDoesNotThrow(() -> authDAO.createAuth(validAuth));
         assertThrows(DataConflictException.class, () -> authDAO.createAuth(validAuth));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
@@ -83,6 +89,8 @@ class AuthDAOTest {
         authDAO.createAuth(validAuth);
 
         assertEquals(validAuth, authDAO.getAuth(validAuth.authToken()));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
@@ -92,6 +100,8 @@ class AuthDAOTest {
 
         assertThrows(DataNotFoundException.class, () -> authDAO.getAuth(null));
         assertThrows(DataNotFoundException.class, () -> authDAO.getAuth("1111"));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
@@ -103,6 +113,8 @@ class AuthDAOTest {
 
         assertDoesNotThrow(() -> authDAO.deleteAuth(validAuth.authToken()));
         assertThrows(DataNotFoundException.class, () -> authDAO.getAuth(validAuth.authToken()));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
@@ -112,6 +124,8 @@ class AuthDAOTest {
 
         assertThrows(DataNotFoundException.class, () -> authDAO.deleteAuth(null));
         assertThrows(DataNotFoundException.class, () -> authDAO.deleteAuth("1111"));
+
+        authDAO.clear();
     }
 
     @ParameterizedTest
