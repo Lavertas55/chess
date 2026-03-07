@@ -1,15 +1,10 @@
 package dataaccess;
 
-import dataaccess.exception.BadDataException;
-import dataaccess.exception.DataAccessException;
-import dataaccess.exception.DataConflictException;
-import dataaccess.exception.DataException;
+import com.mysql.cj.x.protobuf.MysqlxPrepare;
+import dataaccess.exception.*;
 import model.AuthData;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.*;
 
 public class MySQLAuthDAO implements AuthDAO {
 
@@ -39,7 +34,26 @@ public class MySQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataException {
-        throw new RuntimeException("not implemented");
+        String statement = "SELECT * FROM session WHERE auth_token = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, authToken);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int userID = resultSet.getInt("user_id");
+
+                        return new AuthData(userID, authToken);
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s", e.getMessage()));
+        }
+
+        throw new DataNotFoundException("authToken not in use");
     }
 
     @Override
