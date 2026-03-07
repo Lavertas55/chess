@@ -81,7 +81,28 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) throws DataException {
-        throw new RuntimeException("not implemented");
+        String statement = "SELECT * FROM user WHERE username = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, username);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int userID = resultSet.getInt("id");
+                        String password = resultSet.getString("password");
+                        String email = resultSet.getString("email");
+
+                        return new UserData(userID, username, password, email);
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("failed to get user: %s", e.getMessage()));
+        }
+
+        throw new DataNotFoundException(String.format("username %s not found", username));
     }
 
     @Override
