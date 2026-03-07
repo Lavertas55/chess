@@ -34,9 +34,10 @@ class UserDAOTest {
         int userID = 1;
         String username = "valid";
         String password = "password";
+        String hashedPassword = UserDAO.hashPassword(password);
         String email = "test@yahoo.com";
 
-        validUser = new UserData(userID, username, password, email);
+        validUser = new UserData(userID, username, hashedPassword, email);
         registerRequest = new RegisterRequest(username, password, email);
     }
 
@@ -80,7 +81,13 @@ class UserDAOTest {
             UserDAO userDAO = getUserDAO(dbClass);
 
             assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
-            assertEquals(validUser, userDAO.getUser(validUser.username()));
+
+            UserData result = userDAO.getUser(validUser.username());
+
+            assertEquals(validUser.userID(), result.userID());
+            assertEquals(validUser.username(), result.username());
+            assert(UserDAO.isPasswordEqual(registerRequest.password(), result.password()));
+            assertEquals(validUser.email(), result.email());
 
             userDAO.clear();
         }
@@ -101,7 +108,13 @@ class UserDAOTest {
             UserDAO userDAO = getUserDAO(dbClass);
 
             assertDoesNotThrow(() -> userDAO.createUser(registerRequest));
-            assertEquals(validUser, userDAO.getUser(validUser.userID()));
+
+            UserData result = userDAO.getUser(validUser.userID());
+
+            assertEquals(validUser.userID(), result.userID());
+            assertEquals(validUser.username(), result.username());
+            assert(UserDAO.isPasswordEqual(registerRequest.password(), result.password()));
+            assertEquals(validUser.email(), result.email());
 
             userDAO.clear();
         }
@@ -111,7 +124,7 @@ class UserDAOTest {
         void fromUserIDNonExistent(Class<? extends UserDAO> dbClass) throws DataException {
             UserDAO userDAO = getUserDAO(dbClass);
 
-            assertThrows(DataNotFoundException.class, () -> userDAO.getUser("non-existent"));
+            assertThrows(DataNotFoundException.class, () -> userDAO.getUser(3));
 
             userDAO.clear();
         }
