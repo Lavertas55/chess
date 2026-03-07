@@ -5,7 +5,6 @@ import dataaccess.exception.DataAccessException;
 import dataaccess.exception.DataConflictException;
 import dataaccess.exception.DataException;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
 import request.RegisterRequest;
 
 import java.sql.*;
