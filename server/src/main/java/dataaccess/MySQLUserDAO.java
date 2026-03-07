@@ -52,10 +52,6 @@ public class MySQLUserDAO implements UserDAO {
         return null;
     }
 
-    public String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
-    }
-
     @Override
     public UserData getUser(int UserID) throws DataException {
         throw new RuntimeException("not implemented");
