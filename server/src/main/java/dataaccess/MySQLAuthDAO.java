@@ -83,7 +83,6 @@ public class MySQLAuthDAO implements AuthDAO {
                 preparedStatement.executeUpdate();
             }
         }
-
         catch (SQLException e) {
             throw new DataAccessException(String.format("Unable to clear database: %s", e.getMessage()));
         }
