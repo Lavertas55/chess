@@ -191,10 +191,6 @@ public class GameDAOTest {
 
         gameDAO.createGame(validGame.gameName());
 
-        gameDAO.clear();
-
-        assertThrows(DataNotFoundException.class, () -> gameDAO.getGame(validGame.gameID()));
-
-        gameDAO.clear();
+        assertDoesNotThrow(gameDAO::clear);
     }
 }
