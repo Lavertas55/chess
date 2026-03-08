@@ -5,6 +5,7 @@ import chess.ChessGame;
 import dataaccess.exception.BadDataException;
 import dataaccess.exception.DataAccessException;
 import dataaccess.exception.DataException;
+import dataaccess.exception.DataNotFoundException;
 import model.GameData;
 
 import java.sql.*;
@@ -48,7 +49,35 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataException {
-        throw new RuntimeException("not implemented");
+        String statement = "SELECT * FROM game WHERE id = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setInt(1, gameID);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int whiteUserID = resultSet.getInt("white_user_id");
+                        int blackUserID = resultSet.getInt("black_user_id");
+                        String gameName = resultSet.getString("name");
+                        String gameString = resultSet.getString("game_state");
+
+                        return new GameData(
+                                gameID,
+                                whiteUserID != 0 ? whiteUserID : null,
+                                blackUserID != 0 ? blackUserID : null,
+                                gameName,
+                                gameString
+                        );
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to query database: %s", e.getMessage()));
+        }
+
+        throw new DataNotFoundException("gameID not in use");
     }
 
     @Override
