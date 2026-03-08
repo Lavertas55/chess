@@ -59,7 +59,7 @@ class GameServiceTest {
     }
 
     @Test
-    void listGames() throws DataException {
+    void listGames() throws ResponseException, DataException {
         gameDAO.createGame(validGame.gameName());
 
         ListGamesResponse listGamesResponse = gameService.listGames();

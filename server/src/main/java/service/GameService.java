@@ -35,8 +35,15 @@ public class GameService {
         return gameData.gameID();
     }
 
-    public ListGamesResponse listGames() {
-        Collection<GameData> games = gameDAO.listGames();
+    public ListGamesResponse listGames() throws ResponseException {
+        Collection<GameData> games;
+
+        try {
+           games = gameDAO.listGames();
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
 
         return new ListGamesResponse(games);
     }
