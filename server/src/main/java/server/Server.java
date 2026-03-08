@@ -40,9 +40,9 @@ public class Server {
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
                 .exception(ResponseException.class, this::exceptionHandler);
-        authService = new AuthService(new MemoryAuthDAO());
-        userService = new UserService(new MemoryUserDAO());
-        gameService = new GameService(new MemoryGameDAO());
+        authService = new AuthService(new MySQLAuthDAO());
+        userService = new UserService(new MySQLUserDAO());
+        gameService = new GameService(new MySQLGameDAO());
 
         try {
             DatabaseManager.createDatabase();
@@ -63,8 +63,8 @@ public class Server {
 
     private void clearData(Context ctx) throws ResponseException {
         authService.clearAuth();
-        userService.clearUsers();
         gameService.clearGames();
+        userService.clearUsers();
     }
 
     private void registerUser(Context ctx) throws ResponseException {
