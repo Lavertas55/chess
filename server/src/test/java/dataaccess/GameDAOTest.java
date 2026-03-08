@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.exception.*;
 import model.GameData;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +23,7 @@ public class GameDAOTest {
     private static GameData validGame;
     private static int userID;
 
-    private static GameDAO getGameDAO(Class<? extends GameDAO> dbClass) throws DataException {
+    private GameDAO getGameDAO(Class<? extends GameDAO> dbClass) throws DataException {
         GameDAO gameDAO;
         if (dbClass.equals(MySQLGameDAO.class)) {
             DatabaseManager.createDatabase();
@@ -36,7 +37,7 @@ public class GameDAOTest {
         return gameDAO;
     }
 
-    private static void addUsers() throws DataException {
+    private void addUsers() throws DataException {
         String statement = "INSERT INTO user (username, password, email) VALUES (\"user\", \"1234\", \"white@gmail.com\")";
 
         try (var conn = DatabaseManager.getConnection()) {
@@ -105,10 +106,11 @@ public class GameDAOTest {
         assertEquals(gameList, gameDAO.listGames());
     }
 
-    static class TestUpdateUser {
+    @Nested
+    class TestUpdateUser {
 
         @ParameterizedTest
-        @MethodSource("getParameterizedStream")
+        @MethodSource("dataaccess.GameDAOTest#getParameterizedStream")
         void valid(Class<? extends GameDAO> dbClass, ChessGame.TeamColor teamColor) throws DataException {
             GameDAO gameDAO = getGameDAO(dbClass);
 
@@ -125,21 +127,21 @@ public class GameDAOTest {
         }
 
         @ParameterizedTest
-        @MethodSource("getParameterizedStream")
+        @MethodSource("dataaccess.GameDAOTest#getParameterizedStream")
         void notFound(Class<? extends GameDAO> dbClass, ChessGame.TeamColor teamColor) throws DataException {
             GameDAO gameDAO = getGameDAO(dbClass);
 
             assertThrows(DataNotFoundException.class, () -> gameDAO.updateGameUser(0, teamColor, userID));
         }
+    }
 
-        static Stream<Arguments> getParameterizedStream() {
-            List<Class<? extends GameDAO>> classes = List.of(MemoryGameDAO.class, MySQLGameDAO.class);
+    static Stream<Arguments> getParameterizedStream() {
+        List<Class<? extends GameDAO>> classes = List.of(MemoryGameDAO.class, MySQLGameDAO.class);
 
-            return Arrays.stream(ChessGame.TeamColor.values())
-                    .flatMap(teamColor ->
-                        classes.stream().map(dbClass -> Arguments.of(dbClass, teamColor))
-                    );
-        }
+        return Arrays.stream(ChessGame.TeamColor.values())
+                .flatMap(teamColor ->
+                    classes.stream().map(dbClass -> Arguments.of(dbClass, teamColor))
+                );
     }
 
     @ParameterizedTest
