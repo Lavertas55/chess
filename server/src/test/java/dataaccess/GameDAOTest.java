@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,6 +23,10 @@ public class GameDAOTest {
 
     private static GameData validGame;
     private static int userID;
+
+    private static final String USERNAME = "user";
+    private static final String PASSWORD = "1234";
+    private static final String EMAIL = "user@gmail.com";
 
     private GameDAO getGameDAO(Class<? extends GameDAO> dbClass) throws DataException {
         GameDAO gameDAO;
@@ -38,19 +43,50 @@ public class GameDAOTest {
     }
 
     private void addUsers() throws DataException {
-        String statement = "INSERT IGNORE INTO user (username, password, email) VALUES (\"user\", \"1234\", \"white@gmail.com\")";
+        String statement = "INSERT IGNORE INTO user (username, password, email) VALUES (?, ?, ?)";
 
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.executeUpdate();
+            try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, USERNAME);
+                preparedStatement.setString(2, PASSWORD);
+                preparedStatement.setString(3, EMAIL);
 
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                userID = resultSet.getInt(1);
+                preparedStatement.executeUpdate();
+
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                if (resultSet.next()) {
+                    userID = resultSet.getInt(1);
+                }
             }
         }
         catch (SQLException ex) {
             throw new DataAccessException(String.format("failed to add users to database: %s", ex.getMessage()));
+        }
+    }
+
+    private void removeUsers() throws DataException {
+        String[] statements = {
+                "DELETE FROM user",
+                "ALTER TABLE user AUTO_INCREMENT = 1"
+        };
+
+        try (var conn = DatabaseManager.getConnection()) {
+            for (String statement: statements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(String.format("failed to remove users from database: %s", ex.getMessage()));
+        }
+    }
+
+    private void cleanUp(GameDAO gameDAO, Class<? extends GameDAO> dbClass) throws DataException {
+        gameDAO.clear();
+
+        if (dbClass == MySQLGameDAO.class) {
+            removeUsers();
         }
     }
 
@@ -69,7 +105,7 @@ public class GameDAOTest {
 
         assertDoesNotThrow(() -> gameDAO.createGame(validGame.gameName()));
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -79,7 +115,7 @@ public class GameDAOTest {
 
         assertThrows(BadDataException.class, () -> gameDAO.createGame(null));
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -90,7 +126,7 @@ public class GameDAOTest {
 
         assertEquals(validGame, gameDAO.getGame(gameData.gameID()));
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -100,7 +136,7 @@ public class GameDAOTest {
 
         assertThrows(DataNotFoundException.class, () -> gameDAO.getGame(0));
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -113,7 +149,7 @@ public class GameDAOTest {
 
         assertEquals(gameList, gameDAO.listGames());
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -124,6 +160,8 @@ public class GameDAOTest {
         GameData gameData = gameDAO.createGame("test");
 
         assertNull(gameDAO.getGameUser(gameData.gameID(), teamColor));
+
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -132,6 +170,8 @@ public class GameDAOTest {
         GameDAO gameDAO = getGameDAO(dbClass);
 
         assertThrows(DataNotFoundException.class, () -> gameDAO.getGameUser(0, teamColor));
+
+        cleanUp(gameDAO, dbClass);
     }
 
     @Nested
@@ -153,7 +193,7 @@ public class GameDAOTest {
                 case BLACK -> assertEquals(userID, game.blackUserID());
             }
 
-            gameDAO.clear();
+            cleanUp(gameDAO, dbClass);
         }
 
         @ParameterizedTest
@@ -163,7 +203,7 @@ public class GameDAOTest {
 
             assertThrows(DataNotFoundException.class, () -> gameDAO.updateGameUser(0, teamColor, userID));
 
-            gameDAO.clear();
+            cleanUp(gameDAO, dbClass);
         }
     }
 
@@ -189,7 +229,7 @@ public class GameDAOTest {
         GameData game = gameDAO.getGame(gameData.gameID());
         assertEquals(newGameString, game.gameString());
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -199,7 +239,7 @@ public class GameDAOTest {
 
         assertThrows(DataNotFoundException.class, () -> gameDAO.updateGameString(0, "test"));
 
-        gameDAO.clear();
+        cleanUp(gameDAO, dbClass);
     }
 
     @ParameterizedTest
@@ -210,5 +250,7 @@ public class GameDAOTest {
         gameDAO.createGame(validGame.gameName());
 
         assertDoesNotThrow(gameDAO::clear);
+
+        cleanUp(gameDAO, dbClass);
     }
 }
