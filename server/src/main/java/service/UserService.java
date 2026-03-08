@@ -42,7 +42,7 @@ public class UserService {
         try {
             UserData userData = userDAO.getUser(username);
 
-            if (!Objects.equals(userData.password(), password)) {
+            if (!UserDAO.isPasswordEqual(password, userData.password())) {
                 throw new DataNotFoundException("password mismatch");
             }
         }

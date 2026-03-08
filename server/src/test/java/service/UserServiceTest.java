@@ -41,7 +41,9 @@ class UserServiceTest {
         int actual = userService.register(registerRequest);
 
         assertEquals(validUser.userID(), actual);
-        assertEquals(validUser, userDAO.getUser(validUser.username()));
+
+        String hashedPassword = userDAO.getUser(validUser.username()).password();
+        assert(UserDAO.isPasswordEqual(validUser.password(), hashedPassword));
     }
 
     @Test
