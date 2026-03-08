@@ -7,7 +7,6 @@ import dataaccess.exception.DataException;
 import dataaccess.exception.DataNotFoundException;
 import exception.ResponseException;
 import model.GameData;
-import response.ListGamesResponse;
 
 import java.util.Collection;
 
@@ -35,17 +34,13 @@ public class GameService {
         return gameData.gameID();
     }
 
-    public ListGamesResponse listGames() throws ResponseException {
-        Collection<GameData> games;
-
+    public Collection<GameData> listGames() throws ResponseException {
         try {
-           games = gameDAO.listGames();
+           return gameDAO.listGames();
         }
         catch (DataException e) {
             throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
         }
-
-        return new ListGamesResponse(games);
     }
 
     public void joinGame(int gameID, ChessGame.TeamColor color, int userID) throws ResponseException {

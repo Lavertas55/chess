@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import response.ListGamesResponse;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,9 +63,9 @@ class GameServiceTest {
     void listGames() throws ResponseException, DataException {
         gameDAO.createGame(validGame.gameName());
 
-        ListGamesResponse listGamesResponse = gameService.listGames();
+        Collection<GameData> games = gameService.listGames();
         HashSet<GameData> validGameSet = new HashSet<>(Set.of(validGame));
-        assertEquals(validGameSet, listGamesResponse.games());
+        assertEquals(validGameSet, games);
     }
 
     @Test

@@ -1,23 +1,26 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
+import dataaccess.exception.DataException;
 import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.AuthData;
+import model.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
+import response.GameResponse;
 import response.ListGamesResponse;
 import response.LoginResponse;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 public class Server {
@@ -40,6 +43,13 @@ public class Server {
         authService = new AuthService(new MemoryAuthDAO());
         userService = new UserService(new MemoryUserDAO());
         gameService = new GameService(new MemoryGameDAO());
+
+        try {
+            DatabaseManager.createDatabase();
+        }
+        catch (DataException e) {
+            throw new RuntimeException(String.format("failed to start database: %s", e.getMessage()));
+        }
     }
 
     public int run(int desiredPort) {
@@ -92,13 +102,35 @@ public class Server {
 
         authService.verifySession(authToken);
 
-        ListGamesResponse listGamesResponse = gameService.listGames();
+        Collection<GameData> games = gameService.listGames();
+        ListGamesResponse listGamesResponse = convertGameData(games);
 
         String body = new Gson().toJson(
                 Map.of("games", listGamesResponse.games())
         );
 
         ctx.result(body);
+    }
+
+    private ListGamesResponse convertGameData(Collection<GameData> games) throws ResponseException {
+        Collection<GameResponse> convertedGames = new HashSet<>();
+
+        for (GameData game : games) {
+            String whiteUsername = game.whiteUserID() != null ? userService.getUsername(game.whiteUserID()) : null;
+            String blackUsername = game.blackUserID() != null ? userService.getUsername(game.blackUserID()) : null;
+
+            GameResponse convertedGame = new GameResponse(
+                    game.gameID(),
+                    whiteUsername,
+                    blackUsername,
+                    game.gameName(),
+                    game.gameString()
+            );
+
+            convertedGames.add(convertedGame);
+        }
+
+        return new ListGamesResponse(convertedGames);
     }
 
     private void createGame(Context ctx) throws ResponseException {

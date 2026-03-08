@@ -52,7 +52,7 @@ public class UserService {
         }
     }
 
-    public String getUsername(int userID) throws ResponseException {
+    public String getUsername(Integer userID) throws ResponseException {
         try {
             return userDAO.getUser(userID).username();
         }
