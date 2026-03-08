@@ -3,7 +3,6 @@ package dataaccess;
 import chess.ChessGame;
 import dataaccess.exception.*;
 import model.GameData;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,10 +23,6 @@ public class GameDAOTest {
     private static GameData validGame;
     private static int userID;
 
-    private static final String USERNAME = "user";
-    private static final String PASSWORD = "1234";
-    private static final String EMAIL = "user@gmail.com";
-
     private GameDAO getGameDAO(Class<? extends GameDAO> dbClass) throws DataException {
         GameDAO gameDAO;
         if (dbClass.equals(MySQLGameDAO.class)) {
@@ -43,39 +38,19 @@ public class GameDAOTest {
     }
 
     private void addUsers() throws DataException {
-        String statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+        String statement = "INSERT INTO user (username, password, email) VALUES (\"user\", \"1234\", \"white@gmail.com\")";
 
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setString(1, USERNAME);
-                preparedStatement.setString(2, PASSWORD);
-                preparedStatement.setString(3, EMAIL);
+            var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.executeUpdate();
 
-                preparedStatement.executeUpdate();
-
-                ResultSet resultSet = preparedStatement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    userID = resultSet.getInt(1);
-                }
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                userID = resultSet.getInt(1);
             }
         }
         catch (SQLException ex) {
-            throw new DataAccessException(String.format("failed to add user to database: %s", ex.getMessage()));
-        }
-    }
-
-    private void removeUser() throws DataException {
-        String statement = "DELETE FROM user WHERE username = ?";
-
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, USERNAME);
-
-                preparedStatement.executeUpdate();
-            }
-        }
-        catch (SQLException ex) {
-            throw new DataAccessException(String.format("failed to remove user from database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("failed to add users to database: %s", ex.getMessage()));
         }
     }
 
@@ -85,11 +60,6 @@ public class GameDAOTest {
         String gameString = new ChessGame().getBoard().toJson();
 
         validGame = new GameData(1, null, null, gameName, gameString);
-    }
-
-    @AfterEach
-    void cleanup() throws DataException {
-        removeUser();
     }
 
     @ParameterizedTest
