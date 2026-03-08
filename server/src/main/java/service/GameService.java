@@ -41,13 +41,13 @@ public class GameService {
         return new ListGamesResponse(games);
     }
 
-    public void joinGame(int gameID, ChessGame.TeamColor color, String username) throws ResponseException {
+    public void joinGame(int gameID, ChessGame.TeamColor color, int userID) throws ResponseException {
         try {
             if (gameDAO.getGameUser(gameID, color) != null){
                 throw new ResponseException(ResponseException.Code.FORBIDDEN, "Forbidden");
             }
 
-            gameDAO.updateGameUser(gameID, color, username);
+            gameDAO.updateGameUser(gameID, color, userID);
         }
         catch (BadDataException | DataNotFoundException e) {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");

@@ -51,7 +51,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGameUser(int gameID, ChessGame.TeamColor teamColor, String username) throws DataException {
+    public void updateGameUser(int gameID, ChessGame.TeamColor teamColor, Integer userID) throws DataException {
         GameData game = getGame(gameID);
 
         GameData updatedGame;
@@ -59,15 +59,15 @@ public class MemoryGameDAO implements GameDAO {
         switch (teamColor) {
             case WHITE -> updatedGame = new GameData(
                                 game.gameID(),
-                                username,
-                                game.blackUsername(),
+                                userID,
+                                game.blackUserID(),
                                 game.gameName(),
                                 game.gameString()
                         );
             case BLACK -> updatedGame = new GameData(
                                 game.gameID(),
-                                game.whiteUsername(),
-                                username,
+                                game.whiteUserID(),
+                                userID,
                                 game.gameName(),
                                 game.gameString()
                         );
@@ -77,21 +77,21 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public String getGameUser(int gameID, ChessGame.TeamColor teamColor) throws DataException {
+    public Integer getGameUser(int gameID, ChessGame.TeamColor teamColor) throws DataException {
         if (teamColor == null) {
             throw new BadDataException("color cannot be null");
         }
 
         GameData game = getGame(gameID);
-        String username;
+        Integer userID;
 
         switch (teamColor) {
-            case WHITE -> username = game.whiteUsername();
-            case BLACK -> username = game.blackUsername();
+            case WHITE -> userID = game.whiteUserID();
+            case BLACK -> userID = game.blackUserID();
             default -> throw new BadDataException("color cannot be null");
         }
 
-        return username;
+        return userID;
     }
 
     @Override
@@ -100,8 +100,8 @@ public class MemoryGameDAO implements GameDAO {
 
         GameData updatedGame = new GameData(
                 game.gameID(),
-                game.whiteUsername(),
-                game.blackUsername(),
+                game.whiteUserID(),
+                game.blackUserID(),
                 game.gameName(),
                 gameString
         );

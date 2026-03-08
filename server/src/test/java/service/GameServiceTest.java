@@ -26,12 +26,12 @@ class GameServiceTest {
 
     @BeforeAll
     static void init() {
-        String whiteUsername = null;
-        String blackUsername = null;
+        Integer whiteUserID = null;
+        Integer blackUserID = null;
         String gameName = "pretty cool game";
         String gameString = new ChessGame().getBoard().toJson();
 
-        validGame = new GameData(1, whiteUsername, blackUsername, gameName, gameString);
+        validGame = new GameData(1, whiteUserID, blackUserID, gameName, gameString);
     }
 
     @BeforeEach
@@ -71,9 +71,9 @@ class GameServiceTest {
     void joinGameValid() throws ResponseException, DataException {
         gameDAO.createGame(validGame.gameName());
 
-        String newUsername = "new user";
-        gameService.joinGame(validGame.gameID(), ChessGame.TeamColor.WHITE, newUsername);
-        assertEquals(newUsername, gameDAO.getGame(validGame.gameID()).whiteUsername());
+        Integer newUserID = 1;
+        gameService.joinGame(validGame.gameID(), ChessGame.TeamColor.WHITE, newUserID);
+        assertEquals(newUserID, gameDAO.getGame(validGame.gameID()).whiteUserID());
     }
 
     @ParameterizedTest
@@ -81,11 +81,11 @@ class GameServiceTest {
     void joinGameAlreadyTaken(ChessGame.TeamColor color) throws DataException {
         gameDAO.createGame(validGame.gameName());
 
-        gameDAO.updateGameUser(validGame.gameID(), color, "color taken");
+        gameDAO.updateGameUser(validGame.gameID(), color, 1);
 
         ResponseException exception = assertThrows(
                 ResponseException.class,
-                () -> gameService.joinGame(validGame.gameID(), color, "new user")
+                () -> gameService.joinGame(validGame.gameID(), color, 2)
         );
 
         assertEquals(ResponseException.Code.FORBIDDEN, exception.getCode());

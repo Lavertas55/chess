@@ -124,9 +124,8 @@ public class Server {
         JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
 
         int userID = authService.getUserID(authToken);
-        String username = userService.getUsername(userID);
 
-        gameService.joinGame(joinGameRequest.gameID(), joinGameRequest.playerColor(), username);
+        gameService.joinGame(joinGameRequest.gameID(), joinGameRequest.playerColor(), userID);
     }
 
     private void exceptionHandler(ResponseException e, Context ctx) {
