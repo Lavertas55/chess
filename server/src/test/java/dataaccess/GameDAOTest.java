@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MemoryGameDAOTest {
+public class GameDAOTest {
 
     private static GameData validGame;
     private static int userID;
