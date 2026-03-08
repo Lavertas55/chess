@@ -38,7 +38,7 @@ public class GameDAOTest {
     }
 
     private void addUsers() throws DataException {
-        String statement = "INSERT INTO user (username, password, email) VALUES (\"user\", \"1234\", \"white@gmail.com\")";
+        String statement = "INSERT IGNORE INTO user (username, password, email) VALUES (\"user\", \"1234\", \"white@gmail.com\")";
 
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
