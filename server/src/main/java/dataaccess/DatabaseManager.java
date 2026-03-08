@@ -34,7 +34,7 @@ public class DatabaseManager {
                 white_user_id INT,
                 black_user_id INT,
                 name VARCHAR(255) NOT NULL,
-                game_state VARCHAR(255) NOT NULL,
+                game_state TEXT NOT NULL,
                 FOREIGN KEY(white_user_id) REFERENCES user(id),
                 FOREIGN KEY(black_user_id) REFERENCES user(id)
             )
