@@ -3,6 +3,8 @@ package dataaccess;
 import chess.ChessGame;
 import dataaccess.exception.*;
 import model.GameData;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +25,10 @@ public class GameDAOTest {
     private static GameData validGame;
     private static int userID;
 
+    private static final String USERNAME = "user";
+    private static final String PASSWORD = "1234";
+    private static final String EMAIL = "user@gmail.com";
+
     private GameDAO getGameDAO(Class<? extends GameDAO> dbClass) throws DataException {
         GameDAO gameDAO;
         if (dbClass.equals(MySQLGameDAO.class)) {
@@ -38,19 +44,39 @@ public class GameDAOTest {
     }
 
     private void addUsers() throws DataException {
-        String statement = "INSERT INTO user (username, password, email) VALUES (\"user\", \"1234\", \"white@gmail.com\")";
+        String statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
 
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.executeUpdate();
+            try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, USERNAME);
+                preparedStatement.setString(2, PASSWORD);
+                preparedStatement.setString(3, EMAIL);
 
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                userID = resultSet.getInt(1);
+                preparedStatement.executeUpdate();
+
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                if (resultSet.next()) {
+                    userID = resultSet.getInt(1);
+                }
             }
         }
         catch (SQLException ex) {
-            throw new DataAccessException(String.format("failed to add users to database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("failed to add user to database: %s", ex.getMessage()));
+        }
+    }
+
+    private void removeUser() throws DataException {
+        String statement = "DELETE FROM user WHERE username = ?";
+
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, USERNAME);
+
+                preparedStatement.executeUpdate();
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(String.format("failed to remove user from database: %s", ex.getMessage()));
         }
     }
 
@@ -62,12 +88,19 @@ public class GameDAOTest {
         validGame = new GameData(1, null, null, gameName, gameString);
     }
 
+    @AfterEach
+    void cleanup() throws DataException {
+        removeUser();
+    }
+
     @ParameterizedTest
     @ValueSource(classes = {MemoryGameDAO.class, MySQLGameDAO.class})
     void testCreateGameValid(Class<? extends GameDAO> dbClass) throws DataException {
         GameDAO gameDAO = getGameDAO(dbClass);
 
         assertDoesNotThrow(() -> gameDAO.createGame(validGame.gameName()));
+
+        gameDAO.clear();
     }
 
     @ParameterizedTest
@@ -76,6 +109,8 @@ public class GameDAOTest {
         GameDAO gameDAO = getGameDAO(dbClass);
 
         assertThrows(BadDataException.class, () -> gameDAO.createGame(null));
+
+        gameDAO.clear();
     }
 
     @ParameterizedTest
@@ -85,6 +120,8 @@ public class GameDAOTest {
         GameData gameData = gameDAO.createGame(validGame.gameName());
 
         assertEquals(validGame, gameDAO.getGame(gameData.gameID()));
+
+        gameDAO.clear();
     }
 
     @ParameterizedTest
@@ -93,6 +130,8 @@ public class GameDAOTest {
         GameDAO gameDAO = getGameDAO(dbClass);
 
         assertThrows(DataNotFoundException.class, () -> gameDAO.getGame(0));
+
+        gameDAO.clear();
     }
 
     @ParameterizedTest
@@ -104,6 +143,8 @@ public class GameDAOTest {
         Collection<GameData> gameList = new HashSet<>(Set.of(gameData));
 
         assertEquals(gameList, gameDAO.listGames());
+
+        gameDAO.clear();
     }
 
     @Nested
@@ -124,6 +165,8 @@ public class GameDAOTest {
                 case WHITE -> assertEquals(userID, game.whiteUserID());
                 case BLACK -> assertEquals(userID, game.blackUserID());
             }
+
+            gameDAO.clear();
         }
 
         @ParameterizedTest
@@ -132,6 +175,8 @@ public class GameDAOTest {
             GameDAO gameDAO = getGameDAO(dbClass);
 
             assertThrows(DataNotFoundException.class, () -> gameDAO.updateGameUser(0, teamColor, userID));
+
+            gameDAO.clear();
         }
     }
 
@@ -156,6 +201,8 @@ public class GameDAOTest {
 
         GameData game = gameDAO.getGame(gameData.gameID());
         assertEquals(newGameString, game.gameString());
+
+        gameDAO.clear();
     }
 
     @ParameterizedTest
@@ -164,6 +211,8 @@ public class GameDAOTest {
         GameDAO gameDAO = getGameDAO(dbClass);
 
         assertThrows(DataNotFoundException.class, () -> gameDAO.updateGameString(0, "test"));
+
+        gameDAO.clear();
     }
 
     @ParameterizedTest
@@ -176,5 +225,7 @@ public class GameDAOTest {
         gameDAO.clear();
 
         assertThrows(DataNotFoundException.class, () -> gameDAO.getGame(validGame.gameID()));
+
+        gameDAO.clear();
     }
 }
