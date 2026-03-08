@@ -115,7 +115,31 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public Integer getGameUser(int gameID, ChessGame.TeamColor teamColor) throws DataException {
-        throw new RuntimeException("not implemented");
+        if (teamColor == null) {
+            throw new BadDataException("teamColor cannot be null");
+        }
+
+        String statement = "SELECT * FROM game WHERE id = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setInt(1, gameID);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        String columnName = String.format("%s_user_id", teamColor.toString().toLowerCase());
+
+                        int userID = resultSet.getInt(columnName);
+                        return userID != 0 ? userID : null;
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to query database: %s", e.getMessage()));
+        }
+
+        throw new DataNotFoundException("gameID not in use");
     }
 
     @Override
