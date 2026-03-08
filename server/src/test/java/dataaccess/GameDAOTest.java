@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.xml.crypto.Data;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -114,6 +115,24 @@ public class GameDAOTest {
         assertEquals(gameList, gameDAO.listGames());
 
         gameDAO.clear();
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataaccess.GameDAOTest#getParameterizedStream")
+    void testGetGameUserValid(Class<? extends GameDAO> dbClass, ChessGame.TeamColor teamColor) throws DataException {
+        GameDAO gameDAO = getGameDAO(dbClass);
+
+        GameData gameData = gameDAO.createGame("test");
+
+        assertNull(gameDAO.getGameUser(gameData.gameID(), teamColor));
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataaccess.GameDAOTest#getParameterizedStream")
+    void testGetGameUserNotFound(Class<? extends GameDAO> dbClass, ChessGame.TeamColor teamColor) throws DataException {
+        GameDAO gameDAO = getGameDAO(dbClass);
+
+        assertThrows(DataNotFoundException.class, () -> gameDAO.getGameUser(0, teamColor));
     }
 
     @Nested
