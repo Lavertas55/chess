@@ -160,7 +160,22 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void updateGameString(int gameID, String gameString) throws DataException {
-        throw new RuntimeException("not implemented");
+        String statement = "UPDATE game SET game_state = ? WHERE id = ?";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, gameString);
+                preparedStatement.setInt(2, gameID);
+
+                int result = preparedStatement.executeUpdate();
+                if (result == 0) {
+                    throw new DataNotFoundException("gameID not in use");
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update database: %s", e.getMessage()));
+        }
     }
 
     @Override
