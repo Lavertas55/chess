@@ -10,6 +10,7 @@ import model.GameData;
 
 import java.sql.*;
 import java.util.Collection;
+import java.util.HashSet;
 
 public class MySQLGameDAO implements GameDAO {
     @Override
@@ -57,18 +58,7 @@ public class MySQLGameDAO implements GameDAO {
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        int whiteUserID = resultSet.getInt("white_user_id");
-                        int blackUserID = resultSet.getInt("black_user_id");
-                        String gameName = resultSet.getString("name");
-                        String gameString = resultSet.getString("game_state");
-
-                        return new GameData(
-                                gameID,
-                                whiteUserID != 0 ? whiteUserID : null,
-                                blackUserID != 0 ? blackUserID : null,
-                                gameName,
-                                gameString
-                        );
+                        return readGame(resultSet);
                     }
                 }
             }
@@ -81,8 +71,41 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     @Override
-    public Collection<GameData> listGames() {
-        throw new RuntimeException("not implemented");
+    public Collection<GameData> listGames() throws DataException {
+        HashSet<GameData> gameList = new HashSet<>();
+
+        String statement = "SELECT * FROM game";
+
+        try (Connection connection = DatabaseManager.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        gameList.add(readGame(resultSet));
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to query database: %s", e.getMessage()));
+        }
+
+        return gameList;
+    }
+
+    private GameData readGame(ResultSet resultSet) throws SQLException {
+        int gameID = resultSet.getInt("id");
+        int whiteUserID = resultSet.getInt("white_user_id");
+        int blackUserID = resultSet.getInt("black_user_id");
+        String gameName = resultSet.getString("name");
+        String gameString = resultSet.getString("game_state");
+
+        return new GameData(
+                gameID,
+                whiteUserID != 0 ? whiteUserID : null,
+                blackUserID != 0 ? blackUserID : null,
+                gameName,
+                gameString
+        );
     }
 
     @Override
