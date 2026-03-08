@@ -9,8 +9,6 @@ import exception.ResponseException;
 import model.UserData;
 import request.RegisterRequest;
 
-import java.util.Objects;
-
 public class UserService {
 
     private final UserDAO userDAO;
