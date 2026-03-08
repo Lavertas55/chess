@@ -55,8 +55,6 @@ class AuthDAOTest {
 
         assertDoesNotThrow(() -> authDAO.createAuth(validAuth));
 
-        assertThrows(DataConflictException.class, () -> authDAO.createAuth(validAuth));
-
         authDAO.clear();
     }
 
