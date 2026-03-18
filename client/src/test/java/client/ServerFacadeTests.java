@@ -82,14 +82,15 @@ public class ServerFacadeTests {
 
     @Test
     public void loginValid() {
-        var authData = assertDoesNotThrow(() -> facade.register(
+        var registerResponse = assertDoesNotThrow(() -> facade.register(
                 "player1",
                 "password",
                 "player1@email.com"
         ));
 
-        assertDoesNotThrow(() -> facade.logout(authData.authToken()));
-        assertDoesNotThrow(() -> facade.login("player1", "password"));
+        assertDoesNotThrow(() -> facade.logout(registerResponse.authToken()));
+        var loginResponse = assertDoesNotThrow(() -> facade.login("player1", "password"));
+        assertTrue(loginResponse.authToken().length() > 10);
     }
 
     @Test

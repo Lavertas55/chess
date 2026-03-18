@@ -2,9 +2,11 @@ package client;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.AuthData;
 import request.LoginRequest;
 import request.RegisterRequest;
+import response.GameResponse;
+import response.LoginResponse;
+import response.RegisterResponse;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,18 +21,18 @@ public class ServerFacade {
         serverURL = url;
     }
 
-    public AuthData register(String userame, String password, String email) throws ResponseException {
-        RegisterRequest registerRequest = new RegisterRequest(userame, password, email);
+    public RegisterResponse register(String username, String password, String email) throws ResponseException {
+        RegisterRequest registerRequest = new RegisterRequest(username, password, email);
         var request = buildRequest("POST", "/user", null, registerRequest);
         var response = sendRequest(request);
-        return handleResponse(response, AuthData.class);
+        return handleResponse(response, RegisterResponse.class);
     }
 
-    public AuthData login(String username, String password) throws ResponseException {
+    public LoginResponse login(String username, String password) throws ResponseException {
         LoginRequest loginRequest = new LoginRequest(username, password);
         var request = buildRequest("POST", "/session", null, loginRequest);
         var response = sendRequest(request);
-        return handleResponse(response, AuthData.class);
+        return handleResponse(response, LoginResponse.class);
     }
 
     public void logout(String authToken) throws ResponseException {
