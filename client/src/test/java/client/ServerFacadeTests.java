@@ -79,4 +79,26 @@ public class ServerFacadeTests {
 
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
+
+    @Test
+    public void loginValid() {
+        var authData = assertDoesNotThrow(() -> facade.register(
+                "player1",
+                "password",
+                "player1@email.com"
+        ));
+
+        assertDoesNotThrow(() -> facade.logout(authData.authToken()));
+        assertDoesNotThrow(() -> facade.login("player1", "password"));
+    }
+
+    @Test
+    public void loginInvalid() {
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> facade.login("bad username", "bad password")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
 }

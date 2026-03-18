@@ -3,6 +3,7 @@ package client;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.AuthData;
+import request.LoginRequest;
 import request.RegisterRequest;
 
 import java.net.URI;
@@ -21,6 +22,13 @@ public class ServerFacade {
     public AuthData register(String userame, String password, String email) throws ResponseException {
         RegisterRequest registerRequest = new RegisterRequest(userame, password, email);
         var request = buildRequest("POST", "/user", null, registerRequest);
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
+    }
+
+    public AuthData login(String username, String password) throws ResponseException {
+        LoginRequest loginRequest = new LoginRequest(username, password);
+        var request = buildRequest("POST", "/session", null, loginRequest);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
