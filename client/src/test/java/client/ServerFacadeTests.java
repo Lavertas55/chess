@@ -59,4 +59,24 @@ public class ServerFacadeTests {
         assertEquals(ResponseException.Code.BAD_REQUEST, exception.getCode());
     }
 
+    @Test
+    public void logoutValid() {
+        var authData = assertDoesNotThrow(() -> facade.register(
+                "player1",
+                "password",
+                "player1@email.com"
+        ));
+
+        assertDoesNotThrow(() -> facade.logout(authData.authToken()));
+    }
+
+    @Test
+    public void logoutInvalid() {
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> facade.logout("Bad authToken")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
 }

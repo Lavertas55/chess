@@ -20,23 +20,32 @@ public class ServerFacade {
 
     public AuthData register(String userame, String password, String email) throws ResponseException {
         RegisterRequest registerRequest = new RegisterRequest(userame, password, email);
-        var request = buildRequest("POST", "/user", registerRequest);
+        var request = buildRequest("POST", "/user", null, registerRequest);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
-    public void clear() throws ResponseException {
-        var request = buildRequest("DELETE", "/db", null);
+    public void logout(String authToken) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", authToken, null);
         var response = sendRequest(request);
         handleResponse(response, null);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    public void clear() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null, null);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+    private HttpRequest buildRequest(String method, String path, String authToken, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverURL + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if (authToken != null) {
+            request.setHeader("authorization", authToken);
         }
 
         return request.build();
