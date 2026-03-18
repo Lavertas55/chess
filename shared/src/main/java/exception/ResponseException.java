@@ -26,10 +26,10 @@ public class ResponseException extends Exception {
         return serializer.toJson(Map.of("code", code, "message", getMessage()));
     }
 
-    public static ResponseException fromJson(String json) {
+    public static ResponseException fromJson(String json, int statusCode) {
         var serializer = new Gson();
         var map = serializer.fromJson(json, HashMap.class);
-        Code code = Code.valueOf(map.get("code").toString());
+        Code code = fromHttpStatusCode(statusCode);
         String message = map.get("message").toString();
         return new ResponseException(code, message);
     }
