@@ -44,6 +44,17 @@ public class ResponseException extends Exception {
         };
     }
 
+    public static Code fromHttpStatusCode(int statusCode) {
+        return switch (statusCode) {
+            case 403 -> Code.FORBIDDEN;
+            case 401 -> Code.UNAUTHORIZED;
+            case 404 -> Code.NOT_FOUND;
+            case 400 -> Code.BAD_REQUEST;
+            case 500 -> Code.SERVER_ERROR;
+            default -> throw new IllegalStateException("Unexpected value: " + statusCode);
+        };
+    }
+
     public Code getCode() {
         return code;
     }
