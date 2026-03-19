@@ -1,7 +1,10 @@
 package client;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import response.GameResponse;
 import response.RegisterResponse;
 import server.Server;
@@ -139,6 +142,30 @@ public class ServerFacadeTests {
         ResponseException exception = assertThrows(
                 ResponseException.class,
                 () -> facade.listGames("bad auth")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
+
+    @ParameterizedTest
+    @EnumSource(ChessGame.TeamColor.class)
+    public void joinGameValid(ChessGame.TeamColor teamColor) {
+        var registerResponse = registerTestUser();
+        var gameResponse = createTestGame(registerResponse.authToken());
+
+        assertDoesNotThrow(() -> facade.joinGame(
+                registerResponse.authToken(),
+                teamColor,
+                gameResponse.gameID()
+        ));
+    }
+
+    @ParameterizedTest
+    @EnumSource(ChessGame.TeamColor.class)
+    public void joinGameInvalid(ChessGame.TeamColor teamColor) {
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> facade.joinGame("bad auth", teamColor, 1)
         );
 
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
