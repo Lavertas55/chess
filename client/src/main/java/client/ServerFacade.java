@@ -6,6 +6,7 @@ import request.CreateGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
 import response.GameResponse;
+import response.ListGamesResponse;
 import response.LoginResponse;
 import response.RegisterResponse;
 
@@ -47,6 +48,12 @@ public class ServerFacade {
         var request = buildRequest("POST", "/game", authToken, gameRequest);
         var response = sendRequest(request);
         return handleResponse(response, GameResponse.class);
+    }
+
+    public ListGamesResponse listGames(String authToken) throws ResponseException {
+        var request = buildRequest("GET", "/game", authToken, null);
+        var response = sendRequest(request);
+        return handleResponse(response, ListGamesResponse.class);
     }
 
     public void clear() throws ResponseException {

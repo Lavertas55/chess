@@ -2,6 +2,7 @@ package client;
 
 import exception.ResponseException;
 import org.junit.jupiter.api.*;
+import response.GameResponse;
 import response.RegisterResponse;
 import server.Server;
 
@@ -113,12 +114,51 @@ public class ServerFacadeTests {
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
 
+    @Test
+    public void listGamesValid() {
+        var registerResponse = registerTestUser();
+        var gameResponse = createTestGame(registerResponse.authToken());
+
+        var response = assertDoesNotThrow(() -> facade.listGames(registerResponse.authToken()));
+
+        boolean found = false;
+        for (GameResponse game : response.games()) {
+            if (gameResponse.gameID() == game.gameID()) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            fail(String.format("Game ID [%d] was not found in games response", gameResponse.gameID()));
+        }
+    }
+
+    @Test
+    public void listGamesInvalid() {
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> facade.listGames("bad auth")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
+
     private RegisterResponse registerTestUser() {
         try {
             return facade.register("player1", "password", "palyer1@email.com");
         }
         catch (ResponseException ex) {
             throw new RuntimeException(String.format("Failed to register test user: %s", ex.getMessage()));
+        }
+    }
+
+    private GameResponse createTestGame(String authToken) {
+        try {
+            return facade.createGame("test game", authToken);
+        }
+        catch (ResponseException ex) {
+            throw new RuntimeException(String.format("Failed to create test game: %s", ex.getMessage()));
         }
     }
 }
