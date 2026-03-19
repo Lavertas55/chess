@@ -2,6 +2,7 @@ package client;
 
 import exception.ResponseException;
 import org.junit.jupiter.api.*;
+import response.RegisterResponse;
 import server.Server;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,11 +62,7 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutValid() {
-        var registerResponse = assertDoesNotThrow(() -> facade.register(
-                "player1",
-                "password",
-                "player1@email.com"
-        ));
+        var registerResponse = registerTestUser();
 
         assertDoesNotThrow(() -> facade.logout(registerResponse.authToken()));
     }
@@ -82,11 +79,7 @@ public class ServerFacadeTests {
 
     @Test
     public void loginValid() {
-        var registerResponse = assertDoesNotThrow(() -> facade.register(
-                "player1",
-                "password",
-                "player1@email.com"
-        ));
+        var registerResponse = registerTestUser();
 
         assertDoesNotThrow(() -> facade.logout(registerResponse.authToken()));
         var loginResponse = assertDoesNotThrow(() -> facade.login("player1", "password"));
@@ -105,11 +98,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGameValid() {
-        var registerResponse = assertDoesNotThrow(() -> facade.register(
-                "player1",
-                "password",
-                "player1@email.com"
-        ));
+        var registerResponse = registerTestUser();
 
         assertDoesNotThrow(() -> facade.createGame("game1", registerResponse.authToken()));
     }
@@ -122,5 +111,14 @@ public class ServerFacadeTests {
         );
 
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
+
+    private RegisterResponse registerTestUser() {
+        try {
+            return facade.register("player1", "password", "palyer1@email.com");
+        }
+        catch (ResponseException ex) {
+            throw new RuntimeException(String.format("Failed to register test user: %s", ex.getMessage()));
+        }
     }
 }
