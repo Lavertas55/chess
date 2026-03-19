@@ -2,6 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import request.CreateGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
 import response.GameResponse;
@@ -39,6 +40,13 @@ public class ServerFacade {
         var request = buildRequest("DELETE", "/session", authToken, null);
         var response = sendRequest(request);
         handleResponse(response, null);
+    }
+
+    public GameResponse createGame(String gameName, String authToken) throws ResponseException {
+        CreateGameRequest gameRequest = new CreateGameRequest(gameName);
+        var request = buildRequest("POST", "/game", authToken, gameRequest);
+        var response = sendRequest(request);
+        return handleResponse(response, GameResponse.class);
     }
 
     public void clear() throws ResponseException {

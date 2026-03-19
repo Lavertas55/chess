@@ -61,13 +61,13 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutValid() {
-        var authData = assertDoesNotThrow(() -> facade.register(
+        var registerResponse = assertDoesNotThrow(() -> facade.register(
                 "player1",
                 "password",
                 "player1@email.com"
         ));
 
-        assertDoesNotThrow(() -> facade.logout(authData.authToken()));
+        assertDoesNotThrow(() -> facade.logout(registerResponse.authToken()));
     }
 
     @Test
@@ -98,6 +98,27 @@ public class ServerFacadeTests {
         ResponseException exception = assertThrows(
                 ResponseException.class,
                 () -> facade.login("bad username", "bad password")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
+
+    @Test
+    public void createGameValid() {
+        var registerResponse = assertDoesNotThrow(() -> facade.register(
+                "player1",
+                "password",
+                "player1@email.com"
+        ));
+
+        assertDoesNotThrow(() -> facade.createGame("game1", registerResponse.authToken()));
+    }
+
+    @Test
+    public void createGameInvalid() {
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> facade.createGame("game1", "invalid auth")
         );
 
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
