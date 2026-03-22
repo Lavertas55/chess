@@ -62,6 +62,7 @@ public class ChessClient {
                 case "create" -> create(params);
                 case "list" -> list();
                 case "join" -> join(params);
+                case "observe" -> observe(params);
                 case "quit" -> quit();
                 default -> help();
             };
@@ -194,6 +195,29 @@ public class ChessClient {
             }
 
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID> [WHITE|BLACK]");
+        }
+
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+    }
+
+    private String observe(String... params) throws ResponseException {
+        if (state.equals(State.SIGNED_IN)) {
+            if (params.length == 1) {
+                int mapGameID;
+                try {
+                    mapGameID = Integer.parseInt(params[0]);
+                }
+                catch (NumberFormatException ex) {
+                    throw new ResponseException(
+                            ResponseException.Code.BAD_REQUEST,
+                            "ID must be a valid game ID: Use list to see available games"
+                    );
+                }
+
+                return String.format("Successfully observing game: %d", mapGameID);
+            }
+
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID>");
         }
 
         throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
