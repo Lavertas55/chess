@@ -82,7 +82,7 @@ public class ChessClient {
     }
 
     private String login(String... params) throws ResponseException {
-        if (authToken != null) {
+        if (state.equals(State.SIGNED_IN)) {
             throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must logout first");
         }
         if (params.length == 2) {
@@ -99,7 +99,7 @@ public class ChessClient {
     }
 
     private String logout() throws ResponseException {
-        if (authToken != null) {
+        if (state.equals(State.SIGNED_IN)) {
             serverFacade.logout(authToken);
             authToken = null;
             state = State.SIGNED_OUT;
@@ -109,6 +109,8 @@ public class ChessClient {
 
         throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must be logged in first");
     }
+
+
 
     private String help() {
         if (state.equals(State.SIGNED_OUT)) {
