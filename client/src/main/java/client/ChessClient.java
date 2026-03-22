@@ -33,7 +33,13 @@ public class ChessClient {
 
             try {
                 result = eval(line);
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE + result);
+
+                if (result.toLowerCase().contains("error")) {
+                    alert(result);
+                }
+                else {
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE + result);
+                }
             }
             catch (ResponseException ex) {
                 var msg = ex.getMessage();
@@ -84,12 +90,12 @@ public class ChessClient {
 
             return String.format("Successfully logged in as %s", username);
         }
-        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Error: Expected: <USERNAME> <PASSWORD> <EMAIL>");
     }
 
     private String login(String... params) throws ResponseException {
         if (state.equals(State.SIGNED_IN)) {
-            throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must logout first");
+            throw new ResponseException(ResponseException.Code.FORBIDDEN, "Error: You must logout first");
         }
         if (params.length == 2) {
             String username = params[0];
@@ -101,7 +107,7 @@ public class ChessClient {
 
             return String.format("Successfully logged in as %s", username);
         }
-        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD>");
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Error: Expected: <USERNAME> <PASSWORD>");
     }
 
     private String logout() throws ResponseException {
@@ -113,7 +119,7 @@ public class ChessClient {
             return "Successfully logged out";
         }
 
-        throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must be logged in first");
+        throw new ResponseException(ResponseException.Code.FORBIDDEN, "Error: You must be logged in first");
     }
 
     private String create(String... params) throws ResponseException {
@@ -128,7 +134,7 @@ public class ChessClient {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <NAME>");
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
     }
 
     private String list() throws ResponseException {
@@ -154,7 +160,7 @@ public class ChessClient {
             return result.toString();
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
     }
 
     private String quit() {
@@ -164,6 +170,7 @@ public class ChessClient {
             }
             catch (ResponseException ex) {
                 alert("Error: Failed to logout");
+                System.out.println();
             }
         }
 
@@ -171,7 +178,7 @@ public class ChessClient {
     }
 
     private void alert(String msg) {
-        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + msg);
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED + msg);
     }
 
     private String help() {
