@@ -150,7 +150,7 @@ public class ChessClient {
             for (GameResponse game : response.games()) {
                 games.put(index, game.gameID());
                 result.append(String.format(
-                        "\n%d - Name: %s | White: %s | Black: %s",
+                        "\nID: %d | Name: %s | White: %s | Black: %s",
                         index,
                         game.gameName(),
                         game.whiteUsername(),
