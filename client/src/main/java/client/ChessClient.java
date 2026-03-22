@@ -1,17 +1,21 @@
 package client;
 
 import exception.ResponseException;
+import response.GameResponse;
+import response.ListGamesResponse;
 import response.LoginResponse;
 import response.RegisterResponse;
 import ui.EscapeSequences;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class ChessClient {
     private final ServerFacade serverFacade;
     private String authToken = null;
     private State state = State.SIGNED_OUT;
+    private final HashMap<Integer, Integer> games = new HashMap<>();
 
     public ChessClient(String serverURL) {
         serverFacade = new ServerFacade(serverURL);
@@ -23,7 +27,7 @@ public class ChessClient {
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while(!result.equals("quit")) {
+        while(!result.equals("Quiting...")) {
             printPrompt();
             String line = scanner.nextLine();
 
@@ -49,7 +53,8 @@ public class ChessClient {
                 case "login" -> login(params);
                 case "logout" -> logout();
                 case "create" -> create(params);
-                case "quit" -> "quit";
+                case "list" -> list();
+                case "quit" -> quit();
                 default -> help();
             };
         }
@@ -124,6 +129,49 @@ public class ChessClient {
         }
 
         throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+    }
+
+    private String list() throws ResponseException {
+        if (state.equals(State.SIGNED_IN)) {
+            ListGamesResponse response = serverFacade.listGames(authToken);
+            StringBuilder result = new StringBuilder("Games:");
+
+            games.clear();
+            int index = 1;
+            for (GameResponse game : response.games()) {
+                games.put(index, game.gameID());
+                result.append(String.format(
+                        "\n%d - Name: %s | White: %s | Black %s",
+                        index,
+                        game.gameName(),
+                        game.whiteUsername(),
+                        game.blackUsername()
+                ));
+
+                index++;
+            }
+
+            return result.toString();
+        }
+
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+    }
+
+    private String quit() {
+        if (state.equals(State.SIGNED_IN)) {
+            try {
+                serverFacade.logout(authToken);
+            }
+            catch (ResponseException ex) {
+                alert("Error: Failed to logout");
+            }
+        }
+
+        return "Quiting...";
+    }
+
+    private void alert(String msg) {
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + msg);
     }
 
     private String help() {
