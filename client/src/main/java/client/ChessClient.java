@@ -1,6 +1,7 @@
 package client;
 
 import exception.ResponseException;
+import response.LoginResponse;
 import response.RegisterResponse;
 import ui.EscapeSequences;
 
@@ -9,17 +10,16 @@ import java.util.Scanner;
 
 public class ChessClient {
     private final ServerFacade serverFacade;
-    private String authToken;
-    private State state;
+    private String authToken = null;
+    private State state = State.SIGNED_OUT;
 
     public ChessClient(String serverURL) {
         serverFacade = new ServerFacade(serverURL);
-        state = State.SIGNED_OUT;
     }
 
     public void run() {
         System.out.println("♕ Welcome to Chess ♕");
-        System.out.println(help());
+        System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -46,6 +46,7 @@ public class ChessClient {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
+                case "login" -> login(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -77,6 +78,23 @@ public class ChessClient {
             return String.format("Successfully logged in as %s", username);
         }
         throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
+    }
+
+    private String login(String... params) throws ResponseException {
+        if (authToken != null) {
+            throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must logout first");
+        }
+        if (params.length == 2) {
+            String username = params[0];
+            String password = params[1];
+
+            LoginResponse response = serverFacade.login(username, password);
+            authToken = response.authToken();
+            state = State.SIGNED_IN;
+
+            return String.format("Successfully logged in as %s", username);
+        }
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD>");
     }
 
     private String help() {
