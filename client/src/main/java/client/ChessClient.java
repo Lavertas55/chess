@@ -67,7 +67,7 @@ public class ChessClient {
             };
         }
         catch (ResponseException ex) {
-            return ex.getMessage();
+            return "Error: " + ex.getMessage();
         }
     }
 
@@ -92,12 +92,12 @@ public class ChessClient {
 
             return String.format("Successfully logged in as %s", username);
         }
-        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Error: Expected: <USERNAME> <PASSWORD> <EMAIL>");
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
     }
 
     private String login(String... params) throws ResponseException {
         if (state.equals(State.SIGNED_IN)) {
-            throw new ResponseException(ResponseException.Code.FORBIDDEN, "Error: You must logout first");
+            throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must logout first");
         }
         if (params.length == 2) {
             String username = params[0];
@@ -109,7 +109,7 @@ public class ChessClient {
 
             return String.format("Successfully logged in as %s", username);
         }
-        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Error: Expected: <USERNAME> <PASSWORD>");
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD>");
     }
 
     private String logout() throws ResponseException {
@@ -121,7 +121,7 @@ public class ChessClient {
             return "Successfully logged out";
         }
 
-        throw new ResponseException(ResponseException.Code.FORBIDDEN, "Error: You must be logged in first");
+        throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must be logged in first");
     }
 
     private String create(String... params) throws ResponseException {
@@ -136,7 +136,7 @@ public class ChessClient {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <NAME>");
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
     }
 
     private String list() throws ResponseException {
@@ -162,7 +162,7 @@ public class ChessClient {
             return result.toString();
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
     }
 
     private String join(String... params) throws ResponseException {
@@ -173,7 +173,7 @@ public class ChessClient {
                 if (!games.containsKey(mapGameID)) {
                     throw new ResponseException(
                             ResponseException.Code.NOT_FOUND,
-                            String.format("Error: Game %d does not exist: Use list to see games", mapGameID)
+                            String.format("Game %d does not exist: Use list to see available games", mapGameID)
                     );
                 }
                 gameID = games.get(mapGameID);
@@ -186,17 +186,17 @@ public class ChessClient {
                 } else {
                     throw new ResponseException(
                             ResponseException.Code.BAD_REQUEST,
-                            "Error: Please select team WHITE or BLACK"
+                            "Please select team WHITE or BLACK"
                     );
                 }
 
                 return String.format("Successfully joined game: %d as %s", mapGameID, teamColor.toUpperCase());
             }
 
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Error: Expected: <ID> [WHITE|BLACK]");
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID> [WHITE|BLACK]");
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
     }
 
     private String quit() {
