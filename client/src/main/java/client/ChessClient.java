@@ -114,123 +114,113 @@ public class ChessClient {
     }
 
     private String logout() throws ResponseException {
-        if (state.equals(State.SIGNED_IN)) {
-            serverFacade.logout(authToken);
-            authToken = null;
-            state = State.SIGNED_OUT;
+        loginRequired();
 
-            return "Successfully logged out";
-        }
+        serverFacade.logout(authToken);
+        authToken = null;
+        state = State.SIGNED_OUT;
 
-        throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must be logged in first");
+        return "Successfully logged out";
     }
 
     private String create(String... params) throws ResponseException {
-        if (state.equals(State.SIGNED_IN)) {
-            if (params.length == 1) {
-                String name = params[0];
-                serverFacade.createGame(name, authToken);
+        loginRequired();
 
-                return String.format("Successfully created game: %s", name);
-            }
+        if (params.length == 1) {
+            String name = params[0];
+            serverFacade.createGame(name, authToken);
 
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <NAME>");
+            return String.format("Successfully created game: %s", name);
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <NAME>");
     }
 
     private String list() throws ResponseException {
-        if (state.equals(State.SIGNED_IN)) {
-            ListGamesResponse response = serverFacade.listGames(authToken);
-            StringBuilder result = new StringBuilder("Games:");
+        loginRequired();
 
-            games.clear();
-            int index = 1;
-            for (GameResponse game : response.games()) {
-                games.put(index, game.gameID());
-                result.append(String.format(
-                        "\nID: %d | Name: %s | White: %s | Black: %s",
-                        index,
-                        game.gameName(),
-                        game.whiteUsername(),
-                        game.blackUsername()
-                ));
+        ListGamesResponse response = serverFacade.listGames(authToken);
+        StringBuilder result = new StringBuilder("Games:");
 
-                index++;
-            }
+        games.clear();
+        int index = 1;
+        for (GameResponse game : response.games()) {
+            games.put(index, game.gameID());
+            result.append(String.format(
+                    "\nID: %d | Name: %s | White: %s | Black: %s",
+                    index,
+                    game.gameName(),
+                    game.whiteUsername(),
+                    game.blackUsername()
+            ));
 
-            return result.toString();
+            index++;
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+        return result.toString();
     }
 
     private String join(String... params) throws ResponseException {
-        if (state.equals(State.SIGNED_IN)) {
-            if (params.length == 2) {
-                int mapGameID;
-                try {
-                    mapGameID = Integer.parseInt(params[0]);
-                }
-                catch (NumberFormatException ex) {
-                    throw new ResponseException(
-                            ResponseException.Code.BAD_REQUEST,
-                            "ID must be a valid game ID: Use list to see available games"
-                    );
-                }
+        loginRequired();
 
-                int gameID;
-                if (!games.containsKey(mapGameID)) {
-                    throw new ResponseException(
-                            ResponseException.Code.NOT_FOUND,
-                            String.format("Game %d does not exist: Use list to see available games", mapGameID)
-                    );
-                }
-                gameID = games.get(mapGameID);
-
-                String teamColor = params[1];
-                if (teamColor.equals("white")) {
-                    serverFacade.joinGame(authToken, ChessGame.TeamColor.WHITE, gameID);
-                } else if (teamColor.equals("black")) {
-                    serverFacade.joinGame(authToken, ChessGame.TeamColor.BLACK, gameID);
-                } else {
-                    throw new ResponseException(
-                            ResponseException.Code.BAD_REQUEST,
-                            "Please select team WHITE or BLACK"
-                    );
-                }
-
-                return String.format("Successfully joined game: %d as %s", mapGameID, teamColor.toUpperCase());
+        if (params.length == 2) {
+            int mapGameID;
+            try {
+                mapGameID = Integer.parseInt(params[0]);
+            }
+            catch (NumberFormatException ex) {
+                throw new ResponseException(
+                        ResponseException.Code.BAD_REQUEST,
+                        "ID must be a valid game ID: Use list to see available games"
+                );
             }
 
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID> [WHITE|BLACK]");
+            int gameID;
+            if (!games.containsKey(mapGameID)) {
+                throw new ResponseException(
+                        ResponseException.Code.NOT_FOUND,
+                        String.format("Game %d does not exist: Use list to see available games", mapGameID)
+                );
+            }
+            gameID = games.get(mapGameID);
+
+            String teamColor = params[1];
+            if (teamColor.equals("white")) {
+                serverFacade.joinGame(authToken, ChessGame.TeamColor.WHITE, gameID);
+            } else if (teamColor.equals("black")) {
+                serverFacade.joinGame(authToken, ChessGame.TeamColor.BLACK, gameID);
+            } else {
+                throw new ResponseException(
+                        ResponseException.Code.BAD_REQUEST,
+                        "Please select team WHITE or BLACK"
+                );
+            }
+
+            return String.format("Successfully joined game: %d as %s", mapGameID, teamColor.toUpperCase());
         }
 
         throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
     }
 
     private String observe(String... params) throws ResponseException {
-        if (state.equals(State.SIGNED_IN)) {
-            if (params.length == 1) {
-                int mapGameID;
-                try {
-                    mapGameID = Integer.parseInt(params[0]);
-                }
-                catch (NumberFormatException ex) {
-                    throw new ResponseException(
-                            ResponseException.Code.BAD_REQUEST,
-                            "ID must be a valid game ID: Use list to see available games"
-                    );
-                }
+        loginRequired();
 
-                return String.format("Successfully observing game: %d", mapGameID);
+        if (params.length == 1) {
+            int mapGameID;
+            try {
+                mapGameID = Integer.parseInt(params[0]);
+            }
+            catch (NumberFormatException ex) {
+                throw new ResponseException(
+                        ResponseException.Code.BAD_REQUEST,
+                        "ID must be a valid game ID: Use list to see available games"
+                );
             }
 
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID>");
+            return String.format("Successfully observing game: %d", mapGameID);
         }
 
-        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+        throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID>");
     }
 
     private String quit() {
@@ -245,6 +235,15 @@ public class ChessClient {
         }
 
         return "Quiting...";
+    }
+
+    private void loginRequired() throws ResponseException {
+        if (state.equals(State.SIGNED_OUT)) {
+            throw new ResponseException(
+                    ResponseException.Code.UNAUTHORIZED,
+                    "You must be logged in first"
+            );
+        }
     }
 
     private void alert(String msg) {
