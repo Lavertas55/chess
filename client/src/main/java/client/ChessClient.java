@@ -169,7 +169,17 @@ public class ChessClient {
     private String join(String... params) throws ResponseException {
         if (state.equals(State.SIGNED_IN)) {
             if (params.length == 2) {
-                int mapGameID = Integer.parseInt(params[0]);
+                int mapGameID;
+                try {
+                    mapGameID = Integer.parseInt(params[0]);
+                }
+                catch (NumberFormatException ex) {
+                    throw new ResponseException(
+                            ResponseException.Code.BAD_REQUEST,
+                            "ID must be a valid game ID: Use list to see available games"
+                    );
+                }
+
                 int gameID;
                 if (!games.containsKey(mapGameID)) {
                     throw new ResponseException(
