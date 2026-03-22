@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import response.GameResponse;
 import response.ListGamesResponse;
@@ -60,6 +61,7 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "create" -> create(params);
                 case "list" -> list();
+                case "join" -> join(params);
                 case "quit" -> quit();
                 default -> help();
             };
@@ -147,7 +149,7 @@ public class ChessClient {
             for (GameResponse game : response.games()) {
                 games.put(index, game.gameID());
                 result.append(String.format(
-                        "\n%d - Name: %s | White: %s | Black %s",
+                        "\n%d - Name: %s | White: %s | Black: %s",
                         index,
                         game.gameName(),
                         game.whiteUsername(),
@@ -158,6 +160,38 @@ public class ChessClient {
             }
 
             return result.toString();
+        }
+
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
+    }
+
+    private String join(String... params) throws ResponseException {
+        if (state.equals(State.SIGNED_IN)) {
+            int mapGameID = Integer.parseInt(params[0]);
+            int gameID;
+            if (!games.containsKey(mapGameID)) {
+                throw new ResponseException(
+                        ResponseException.Code.NOT_FOUND,
+                        String.format("Error: Game %d does not exist: Use list to see games", mapGameID)
+                );
+            }
+            gameID = games.get(mapGameID);
+
+            String teamColor = params[1];
+            if (teamColor.equals("white")) {
+                serverFacade.joinGame(authToken, ChessGame.TeamColor.WHITE, gameID);
+            }
+            else if (teamColor.equals("black")) {
+                serverFacade.joinGame(authToken, ChessGame.TeamColor.BLACK, gameID);
+            }
+            else {
+                throw new ResponseException(
+                        ResponseException.Code.BAD_REQUEST,
+                        "Error: Please select team WHITE or BLACK"
+                );
+            }
+
+            return String.format("Successfully joined game: %d as %s", mapGameID, teamColor.toUpperCase());
         }
 
         throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "Error: You must be logged in first");
