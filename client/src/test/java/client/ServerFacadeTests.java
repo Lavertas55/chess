@@ -171,6 +171,20 @@ public class ServerFacadeTests {
         assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
     }
 
+    @Test
+    public void clear() {
+        var registerResponse = registerTestUser();
+
+        assertDoesNotThrow(facade::clear);
+
+        ResponseException exception = assertThrows(
+                ResponseException.class,
+                () -> facade.login(registerResponse.username(), "password")
+        );
+
+        assertEquals(ResponseException.Code.UNAUTHORIZED, exception.getCode());
+    }
+
     private RegisterResponse registerTestUser() {
         try {
             return facade.register("player1", "password", "palyer1@email.com");
