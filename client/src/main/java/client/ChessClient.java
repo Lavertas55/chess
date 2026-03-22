@@ -47,6 +47,7 @@ public class ChessClient {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
+                case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -95,6 +96,18 @@ public class ChessClient {
             return String.format("Successfully logged in as %s", username);
         }
         throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <USERNAME> <PASSWORD>");
+    }
+
+    private String logout() throws ResponseException {
+        if (authToken != null) {
+            serverFacade.logout(authToken);
+            authToken = null;
+            state = State.SIGNED_OUT;
+
+            return "Successfully logged out";
+        }
+
+        throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must be logged in first");
     }
 
     private String help() {
