@@ -48,6 +48,7 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
+                case "create" -> create(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -110,7 +111,20 @@ public class ChessClient {
         throw new ResponseException(ResponseException.Code.FORBIDDEN, "You must be logged in first");
     }
 
+    private String create(String... params) throws ResponseException {
+        if (state.equals(State.SIGNED_IN)) {
+            if (params.length == 1) {
+                String name = params[0];
+                serverFacade.createGame(name, authToken);
 
+                return String.format("Successfully created game: %s", name);
+            }
+
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <NAME>");
+        }
+
+        throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
+    }
 
     private String help() {
         if (state.equals(State.SIGNED_OUT)) {
