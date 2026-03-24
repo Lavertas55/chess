@@ -1,22 +1,30 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import exception.ResponseException;
 import response.GameResponse;
 import response.ListGamesResponse;
 import response.LoginResponse;
 import response.RegisterResponse;
-import ui.EscapeSequences;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
+
+import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private final ServerFacade serverFacade;
     private String authToken = null;
     private State state = State.SIGNED_OUT;
+
     private final HashMap<Integer, Integer> games = new HashMap<>();
+
+    private static final int BOARD_SIZE_IN_CELLS = 10;
+    private static final int CELL_SIZE = 3;
+    private static final String EMPTY = " ";
 
     public ChessClient(String serverURL) {
         serverFacade = new ServerFacade(serverURL);
@@ -24,7 +32,7 @@ public class ChessClient {
 
     public void run() {
         System.out.println("♕ Welcome to Chess ♕");
-        System.out.println(EscapeSequences.SET_TEXT_COLOR_BLUE + help());
+        System.out.println(SET_TEXT_COLOR_BLUE + help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -39,7 +47,7 @@ public class ChessClient {
                     alert(result);
                 }
                 else {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE + result);
+                    System.out.print(SET_TEXT_COLOR_BLUE + result);
                 }
             }
             catch (ResponseException ex) {
@@ -75,9 +83,9 @@ public class ChessClient {
     private void printPrompt() {
         System.out.printf(
                 "\n%s[%s] >>>%s ",
-                EscapeSequences.RESET_TEXT_COLOR,
+                RESET_TEXT_COLOR,
                 state,
-                EscapeSequences.SET_TEXT_COLOR_GREEN
+                SET_TEXT_COLOR_GREEN
         );
     }
 
@@ -184,11 +192,13 @@ public class ChessClient {
             }
             gameID = games.get(mapGameID);
 
-            String teamColor = params[1];
-            if (teamColor.equals("white")) {
-                serverFacade.joinGame(authToken, ChessGame.TeamColor.WHITE, gameID);
-            } else if (teamColor.equals("black")) {
-                serverFacade.joinGame(authToken, ChessGame.TeamColor.BLACK, gameID);
+            String teamColorString = params[1];
+            ChessGame.TeamColor teamColor;
+
+            if (teamColorString.equals("white")) {
+                teamColor = ChessGame.TeamColor.WHITE;
+            } else if (teamColorString.equals("black")) {
+                teamColor = ChessGame.TeamColor.BLACK;
             } else {
                 throw new ResponseException(
                         ResponseException.Code.BAD_REQUEST,
@@ -196,7 +206,10 @@ public class ChessClient {
                 );
             }
 
-            return String.format("Successfully joined game: %d as %s", mapGameID, teamColor.toUpperCase());
+            serverFacade.joinGame(authToken, teamColor, gameID);
+
+            drawBoard(System.out, new ChessBoard(), teamColor);
+            return String.format("\nSuccessfully joined game: %d as %s", mapGameID, teamColorString.toUpperCase());
         }
 
         throw new ResponseException(ResponseException.Code.UNAUTHORIZED, "You must be logged in first");
@@ -217,10 +230,57 @@ public class ChessClient {
                 );
             }
 
-            return String.format("Successfully observing game: %d", mapGameID);
+            drawBoard(System.out, new ChessBoard(), ChessGame.TeamColor.WHITE);
+            return String.format("\nSuccessfully observing game: %d", mapGameID);
         }
 
         throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <ID>");
+    }
+
+    private void drawBoard(PrintStream out, ChessBoard board, ChessGame.TeamColor teamColor) {
+        drawRankHeaders(out, teamColor);
+        setBlack(out);
+    }
+
+    private void drawRankHeaders(PrintStream out, ChessGame.TeamColor teamColor) {
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+
+        String[] ranks = { "a", "b", "c", "d", "e", "f", "g", "h" };
+        int boardColumn;
+        int step;
+
+        if (teamColor.equals(ChessGame.TeamColor.WHITE)) {
+            boardColumn = 0;
+            step = 1;
+        }
+        else {
+            boardColumn = 9;
+            step = -1;
+        }
+
+        while (boardColumn < BOARD_SIZE_IN_CELLS && boardColumn >= 0) {
+            if (boardColumn > 0 && boardColumn < 9) {
+                drawHeader(out, ranks[boardColumn - 1]);
+            }
+            else {
+                out.print(EMPTY.repeat(CELL_SIZE));
+            }
+
+            boardColumn += step;
+        }
+    }
+
+    private void drawHeader(PrintStream out, String header) {
+        int prefixLength = CELL_SIZE / 2;
+        int suffixLength = CELL_SIZE - prefixLength - 1;
+
+        out.print(EMPTY.repeat(prefixLength));
+        out.print(header);
+        out.print(EMPTY.repeat(suffixLength));
+    }
+
+    private void setBlack(PrintStream out) {
+        out.print(RESET_BG_COLOR + RESET_TEXT_COLOR);
     }
 
     private String quit() {
@@ -247,7 +307,7 @@ public class ChessClient {
     }
 
     private void alert(String msg) {
-        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED + msg);
+        System.out.print(SET_TEXT_COLOR_RED + msg);
     }
 
     private String help() {
