@@ -32,7 +32,7 @@ public class LoginMenu extends UIMenu {
             case "login" -> login(params);
             case "help" -> help();
             case "quit" -> quit();
-            default -> null;
+            default -> help();
         };
     }
 

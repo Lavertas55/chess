@@ -27,8 +27,6 @@ public abstract class UIMenu implements Displayable {
     }
 
     Optional<State> run() {
-        help();
-
         Scanner scanner = new Scanner(System.in);
         printPrompt();
         String line = scanner.nextLine();

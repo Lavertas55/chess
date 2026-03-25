@@ -31,9 +31,8 @@ public class UserMenu extends UIMenu {
             case "join" -> join(params);
             case "observe" -> observe(params);
             case "logout" -> logout();
-            case "help" -> help();
             case "quit" -> quit();
-            default -> null;
+            default -> help();
         };
     }
 
