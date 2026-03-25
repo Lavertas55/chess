@@ -26,9 +26,8 @@ public abstract class UIMenu implements Displayable {
         return run();
     }
 
-    private Optional<State> run() {
-        System.out.println("♕ Welcome to Chess ♕");
-        System.out.println(SET_TEXT_COLOR_BLUE + help());
+    Optional<State> run() {
+        help();
 
         Scanner scanner = new Scanner(System.in);
         printPrompt();
@@ -44,7 +43,7 @@ public abstract class UIMenu implements Displayable {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            result = eval(input, params);
+            result = eval(cmd, params);
         }
         catch (ResponseException ex) {
             alert(ex.getMessage());
@@ -53,7 +52,7 @@ public abstract class UIMenu implements Displayable {
         return Optional.ofNullable(result);
     }
 
-    abstract State eval(String input, String... params) throws ResponseException;
+    abstract State eval(String cmd, String... params) throws ResponseException;
 
     abstract void printPrompt();
 
