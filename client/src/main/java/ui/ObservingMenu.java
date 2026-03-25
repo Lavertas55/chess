@@ -17,6 +17,7 @@ public class ObservingMenu extends GameMenu {
     @Override
     State eval(String cmd, String... params) throws ResponseException {
         return switch (cmd) {
+            case "draw" -> draw();
             case "exit" -> exit();
             case "quit" -> quit();
             default -> help();
@@ -38,6 +39,7 @@ public class ObservingMenu extends GameMenu {
         """
              
              USAGE:
+             - draw
              - exit
              - help
              - quit
