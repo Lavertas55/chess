@@ -103,7 +103,7 @@ public class UserMenu extends UIMenu {
             }
             gameID = games.get(mapGameID);
 
-            String teamColorString = params[1];
+            String teamColorString = params[1].toLowerCase();
             ChessGame.TeamColor teamColor;
 
             if (teamColorString.equals("white")) {
