@@ -118,19 +118,30 @@ public abstract class GameMenu extends UIMenu {
         }
 
         while (boardRow < BOARD_SIZE_IN_CELLS - 1 && boardRow > 0) {
-            drawRow(out, boardRow, rowStartColor, board);
+            drawRow(out, boardRow, rowStartColor, board, teamColor);
             rowStartColor = rowStartColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
 
             boardRow += step;
         }
     }
 
-    private void drawRow(PrintStream out, int rowNum, String startColor, ChessBoard board) {
+    private void drawRow(PrintStream out, int rowNum, String startColor, ChessBoard board, ChessGame.TeamColor teamColor) {
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         drawCell(out, String.valueOf(rowNum));
 
+        int boardColumn;
+        int step;
+        if (teamColor.equals(ChessGame.TeamColor.WHITE)) {
+            boardColumn = 1;
+            step = 1;
+        }
+        else {
+            boardColumn = 8;
+            step = -1;
+        }
+
         String cellColor = startColor;
-        for (int boardColumn = 1; boardColumn < BOARD_SIZE_IN_CELLS - 1; boardColumn++) {
+        while (boardColumn < BOARD_SIZE_IN_CELLS - 1 && boardColumn > 0) {
             ChessPiece piece = board.getPiece(new ChessPosition(rowNum, boardColumn));
             String pieceString = piece == null ? EMPTY : piece.toString().toUpperCase();
 
@@ -145,6 +156,8 @@ public abstract class GameMenu extends UIMenu {
             drawCell(out, pieceString);
 
             cellColor = cellColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+
+            boardColumn += step;
         }
 
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
