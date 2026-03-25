@@ -2,6 +2,8 @@ package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exception.ResponseException;
 import response.GameResponse;
 import response.ListGamesResponse;
@@ -208,7 +210,7 @@ public class ChessClient {
 
             serverFacade.joinGame(authToken, teamColor, gameID);
 
-            drawBoard(System.out, new ChessBoard(), teamColor);
+            drawBoard(System.out, new ChessGame().getBoard(), teamColor);
             return String.format("\nSuccessfully joined game: %d as %s", mapGameID, teamColorString.toUpperCase());
         }
 
@@ -230,7 +232,7 @@ public class ChessClient {
                 );
             }
 
-            drawBoard(System.out, new ChessBoard(), ChessGame.TeamColor.WHITE);
+            drawBoard(System.out, new ChessGame().getBoard(), ChessGame.TeamColor.WHITE);
             return String.format("\nSuccessfully observing game: %d", mapGameID);
         }
 
@@ -239,7 +241,8 @@ public class ChessClient {
 
     private void drawBoard(PrintStream out, ChessBoard board, ChessGame.TeamColor teamColor) {
         drawRankHeaders(out, teamColor);
-        setBlack(out);
+        drawChessRows(out, teamColor, board);
+        drawRankHeaders(out, teamColor);
     }
 
     private void drawRankHeaders(PrintStream out, ChessGame.TeamColor teamColor) {
@@ -260,7 +263,7 @@ public class ChessClient {
 
         while (boardColumn < BOARD_SIZE_IN_CELLS && boardColumn >= 0) {
             if (boardColumn > 0 && boardColumn < 9) {
-                drawHeader(out, ranks[boardColumn - 1]);
+                drawCell(out, ranks[boardColumn - 1]);
             }
             else {
                 out.print(EMPTY.repeat(CELL_SIZE));
@@ -268,15 +271,68 @@ public class ChessClient {
 
             boardColumn += step;
         }
+        setBlack(out);
+        out.println();
     }
 
-    private void drawHeader(PrintStream out, String header) {
+    private void drawCell(PrintStream out, String text) {
         int prefixLength = CELL_SIZE / 2;
         int suffixLength = CELL_SIZE - prefixLength - 1;
 
         out.print(EMPTY.repeat(prefixLength));
-        out.print(header);
+        out.print(text);
         out.print(EMPTY.repeat(suffixLength));
+    }
+
+    private void drawChessRows(PrintStream out, ChessGame.TeamColor teamColor, ChessBoard board) {
+        String rowStartColor = SET_BG_COLOR_WHITE;
+
+        int boardRow;
+        int step;
+        if (teamColor.equals(ChessGame.TeamColor.WHITE)) {
+            boardRow = 8;
+            step = -1;
+        }
+        else {
+            boardRow = 1;
+            step = 1;
+        }
+
+        while (boardRow < BOARD_SIZE_IN_CELLS - 1 && boardRow > 0) {
+            drawRow(out, boardRow, rowStartColor, board);
+            rowStartColor = rowStartColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+
+            boardRow += step;
+        }
+    }
+
+    private void drawRow(PrintStream out, int rowNum, String startColor, ChessBoard board) {
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        drawCell(out, String.valueOf(rowNum));
+
+        String cellColor = startColor;
+        for (int boardColumn = 1; boardColumn < BOARD_SIZE_IN_CELLS - 1; boardColumn++) {
+            ChessPiece piece = board.getPiece(new ChessPosition(rowNum, boardColumn));
+            String pieceString = piece == null ? EMPTY : piece.toString().toUpperCase();
+
+            if (piece != null && piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+                pieceString = SET_TEXT_COLOR_RED + pieceString;
+            }
+            else if (piece != null && piece.getTeamColor().equals(ChessGame.TeamColor.BLACK)) {
+                pieceString = SET_TEXT_COLOR_BLUE + pieceString;
+            }
+
+            out.print(cellColor);
+            drawCell(out, pieceString);
+
+            cellColor = cellColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+        }
+
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        drawCell(out, String.valueOf(rowNum));
+
+        setBlack(out);
+        out.println();
     }
 
     private void setBlack(PrintStream out) {
