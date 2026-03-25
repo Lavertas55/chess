@@ -52,6 +52,6 @@ public class PlayerMenu extends GameMenu {
              """
         );
 
-        return State.OBSERVING;
+        return State.IN_GAME;
     }
 }
