@@ -44,12 +44,13 @@ public abstract class GameMenu extends UIMenu {
 
     @Override
     Optional<State> run() {
+        draw();
+        help();
         return super.run();
     }
 
-    State draw() {
+    void draw() {
         drawBoard(System.out, game.getBoard(), teamColor);
-        return null;
     }
 
     State exit() {
