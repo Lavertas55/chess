@@ -30,7 +30,6 @@ public class LoginMenu extends UIMenu {
         return switch (cmd) {
             case "register" -> register(params);
             case "login" -> login(params);
-            case "help" -> help();
             case "quit" -> quit();
             default -> help();
         };
@@ -71,13 +70,19 @@ public class LoginMenu extends UIMenu {
         """
              
              USAGE:
-             - register <USERNAME> <PASSWORD> <EMAIL>
-             - login <USERNAME> <PASSWORD>
-             - help
-             - quit
+             - register <USERNAME> <PASSWORD> <EMAIL> - Register new user
+             - login <USERNAME> <PASSWORD> - Login as user
+             - help - Show available commands
+             - quit - Exit program
              """
         );
 
         return State.SIGNED_OUT;
+    }
+
+
+    private State quit() {
+        notify("Quiting...");
+        return State.QUIT;
     }
 }

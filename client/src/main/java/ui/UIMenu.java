@@ -63,9 +63,4 @@ public abstract class UIMenu implements Displayable {
     }
 
     abstract State help();
-
-    State quit() {
-        notify("Quiting...");
-        return State.QUIT;
-    }
 }

@@ -31,7 +31,6 @@ public class UserMenu extends UIMenu {
             case "join" -> join(params);
             case "observe" -> observe(params);
             case "logout" -> logout();
-            case "quit" -> quit();
             default -> help();
         };
     }
@@ -175,13 +174,12 @@ public class UserMenu extends UIMenu {
         """
              
              USAGE:
-             - create <NAME>
-             - list
-             - join <ID> [WHITE|BLACK]
-             - observe <ID>
-             - logout
-             - help
-             - quit
+             - create <NAME> - Create new game
+             - list - List all games
+             - join <ID> [WHITE|BLACK] - Join game
+             - observe <ID> - Observe game
+             - logout - Logout from current user
+             - help - Show available commands
              """
         );
 
