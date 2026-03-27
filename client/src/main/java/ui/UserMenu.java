@@ -65,12 +65,16 @@ public class UserMenu extends UIMenu {
         int index = 1;
         for (GameResponse game : response.games()) {
             games.put(index, game.gameID());
+
+            String whiteUsername = game.whiteUsername() != null ? game.whiteUsername() : "<Available>";
+            String blackUsername = game.blackUsername() != null ? game.blackUsername() : "<Available>";
+
             result.append(String.format(
                     "\nID: %d | Name: %s | White: %s | Black: %s",
                     index,
                     game.gameName(),
-                    game.whiteUsername(),
-                    game.blackUsername()
+                    whiteUsername,
+                    blackUsername
             ));
 
             index++;
