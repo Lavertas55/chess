@@ -43,6 +43,21 @@ public class GameService {
         }
     }
 
+    public GameData getGame(int gameID) throws ResponseException {
+        try {
+            return gameDAO.getGame(gameID);
+        }
+        catch (DataNotFoundException ex) {
+            throw new ResponseException(
+                    ResponseException.Code.NOT_FOUND,
+                    String.format("Game ID %d does not exist", gameID)
+            );
+        }
+        catch (DataException ex) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, ex.getMessage());
+        }
+    }
+
     public void joinGame(int gameID, ChessGame.TeamColor color, int userID) throws ResponseException {
         try {
             if (gameDAO.getGameUser(gameID, color) != null){
