@@ -18,6 +18,7 @@ import response.LoginResponse;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
+import websocket.WebSocketHandler;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,8 +30,22 @@ public class Server {
     private final AuthService authService;
     private final UserService userService;
     private final GameService gameService;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
+        authService = new AuthService(new MySQLAuthDAO());
+        userService = new UserService(new MySQLUserDAO());
+        gameService = new GameService(new MySQLGameDAO());
+
+        webSocketHandler = new WebSocketHandler(authService, userService, gameService);
+
+        try {
+            DatabaseManager.createDatabase();
+        }
+        catch (DataException e) {
+            throw new RuntimeException(String.format("failed to start database: %s", e.getMessage()));
+        }
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .delete("/db", this::clearData)
                 .post("/user", this::registerUser)
@@ -39,17 +54,12 @@ public class Server {
                 .get("/game", this::listGames)
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
+                .ws("/ws", ws -> {
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                })
                 .exception(ResponseException.class, this::exceptionHandler);
-        authService = new AuthService(new MySQLAuthDAO());
-        userService = new UserService(new MySQLUserDAO());
-        gameService = new GameService(new MySQLGameDAO());
-
-        try {
-            DatabaseManager.createDatabase();
-        }
-        catch (DataException e) {
-            throw new RuntimeException(String.format("failed to start database: %s", e.getMessage()));
-        }
     }
 
     public int run(int desiredPort) {
@@ -158,6 +168,7 @@ public class Server {
         int userID = authService.getUserID(authToken);
 
         gameService.joinGame(joinGameRequest.gameID(), joinGameRequest.playerColor(), userID);
+
     }
 
     private void exceptionHandler(ResponseException e, Context ctx) {
