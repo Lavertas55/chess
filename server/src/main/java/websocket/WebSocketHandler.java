@@ -32,26 +32,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) throws ResponseException {
+    public void handleMessage(WsMessageContext ctx) {
         try {
-            UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            switch (action.getCommandType()) {
-                case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
+            try {
+                UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+                switch (action.getCommandType()) {
+                    case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
+                }
+            } catch (ResponseException ex) {
+                ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
+                ctx.session.getRemote().sendString(message.toString());
             }
         }
         catch (IOException ex) {
+            System.out.printf("Failed to send message: %s%n", ex.getMessage());
             ex.printStackTrace();
         }
     }
 
     private void connect(String authToken, int gameID, Session session) throws IOException, ResponseException {
-        // Use authToken to get userID (Through authService)
-        // Use userID to get username (through userService) and with gameID get teamColor (Through gameService)
-
-        // If userID not in valid sessions -> Unauthorized
-        // Using gameID lookup connections
-        // Send message to each user that <USERNAME> joined as <TEAM COLOR> (Except joining user)
-
         authService.verifySession(authToken);
         int userID = authService.getUserID(authToken);
         String username = userService.getUsername(userID);
@@ -61,25 +60,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String teamColor = "OBSERVER";
         if (game.whiteUserID().equals(userID)) {
             teamColor = "WHITE";
-        }
-        else if (game.blackUserID().equals(userID)) {
+        } else if (game.blackUserID().equals(userID)) {
             teamColor = "BLACK";
         }
 
         ServerMessage notificationMessage = new ServerMessage(
                 ServerMessage.ServerMessageType.NOTIFICATION,
-                null,
                 String.format("%s joined as %s", username, teamColor)
         );
 
         ServerMessage gameMessage = new ServerMessage(
                 ServerMessage.ServerMessageType.LOAD_GAME,
-                game.gameString(),
-                null
+                game.gameString()
         );
 
         connectionManager.add(gameID, session);
         connectionManager.broadcast(gameID, session, notificationMessage);
+
         session.getRemote().sendString(gameMessage.toString());
     }
 
