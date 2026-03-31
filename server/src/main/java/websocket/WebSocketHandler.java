@@ -46,7 +46,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         catch (IOException ex) {
             System.out.printf("Failed to send message: %s%n", ex.getMessage());
-            ex.printStackTrace();
         }
     }
 
