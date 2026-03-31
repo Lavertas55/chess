@@ -14,6 +14,7 @@ public class ServerMessage {
     ServerMessageType serverMessageType;
     String game;
     String message;
+    String errorMessage;
 
     public enum ServerMessageType {
         LOAD_GAME,
