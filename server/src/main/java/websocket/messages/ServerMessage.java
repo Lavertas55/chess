@@ -22,10 +22,18 @@ public class ServerMessage {
         NOTIFICATION
     }
 
-    public ServerMessage(ServerMessageType type, String game, String message) {
+    public ServerMessage(ServerMessageType type, String message) {
         this.serverMessageType = type;
-        this.game = game;
-        this.message = message;
+
+        if (this.serverMessageType.equals(ServerMessageType.LOAD_GAME)) {
+            this.game = message;
+        }
+        else if (this.serverMessageType.equals(ServerMessageType.ERROR)) {
+            this.errorMessage = message;
+        }
+        else if (this.serverMessageType.equals(ServerMessageType.NOTIFICATION)) {
+            this.message = message;
+        }
     }
 
     public ServerMessageType getServerMessageType() {
