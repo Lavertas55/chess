@@ -92,7 +92,7 @@ public class GameDAOTest {
     @BeforeAll
     static void init() {
         String gameName = "game 1";
-        String gameString = new ChessGame().getBoard().toJson();
+        String gameString = new ChessGame().toJson();
 
         validGame = new GameData(1, null, null, gameName, gameString);
     }

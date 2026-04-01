@@ -24,7 +24,7 @@ public class MemoryGameDAO implements GameDAO {
                 null,
                 null,
                 gameName,
-                new ChessGame().getBoard().toJson()
+                new ChessGame().toJson()
         );
 
         gameStorage.put(gameData.gameID(), gameData);

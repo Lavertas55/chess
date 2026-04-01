@@ -1,6 +1,5 @@
 package dataaccess;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import dataaccess.exception.BadDataException;
 import dataaccess.exception.DataAccessException;
@@ -19,7 +18,7 @@ public class MySQLGameDAO implements GameDAO {
             throw new BadDataException("gameName cannot be null");
         }
 
-        ChessBoard board = new ChessGame().getBoard();
+        ChessGame chessGame = new ChessGame();
 
         String statement = "INSERT INTO game (white_user_id, black_user_id, name, game_state)" +
                 " VALUES (NULL, NULL, ?, ?)";
@@ -29,7 +28,7 @@ public class MySQLGameDAO implements GameDAO {
                          connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)
             ) {
                 preparedStatement.setString(1, gameName);
-                preparedStatement.setString(2, board.toJson());
+                preparedStatement.setString(2, chessGame.toJson());
 
                 preparedStatement.executeUpdate();
 
@@ -37,7 +36,7 @@ public class MySQLGameDAO implements GameDAO {
                 if (resultSet.next()) {
                     int gameID = resultSet.getInt(1);
 
-                    return new GameData(gameID, null, null, gameName, board.toJson());
+                    return new GameData(gameID, null, null, gameName, chessGame.toJson());
                 }
             }
         }
