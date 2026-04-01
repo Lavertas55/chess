@@ -74,6 +74,21 @@ public class GameService {
         }
     }
 
+    public void updateGame(int gameID, String gameString) throws ResponseException {
+        try {
+            gameDAO.updateGameString(gameID, gameString);
+        }
+        catch (DataNotFoundException ex) {
+            throw new ResponseException(ResponseException.Code.NOT_FOUND, String.format("Game %d not found", gameID));
+        }
+        catch (DataException ex) {
+            throw new ResponseException(
+                    ResponseException.Code.SERVER_ERROR,
+                    String.format("Failed to update game string: %s", ex.getMessage())
+            );
+        }
+    }
+
     public void clearGames() throws ResponseException {
         try {
             gameDAO.clear();
