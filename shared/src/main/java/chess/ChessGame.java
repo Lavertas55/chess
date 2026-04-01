@@ -16,6 +16,7 @@ public class ChessGame implements Cloneable {
 
     private ChessGame.TeamColor currentTeam;
     private ChessBoard board;
+    private boolean gameDone = false;
 
     public ChessGame() {
         currentTeam = TeamColor.WHITE;
@@ -203,6 +204,14 @@ public class ChessGame implements Cloneable {
         Collection<ChessMove> candidateMoves = candidateMoves(teamColor);
 
         return candidateMoves.isEmpty() && !isInCheck(teamColor);
+    }
+
+    public void endGame() {
+        gameDone = true;
+    }
+
+    public boolean isGameDone() {
+        return gameDone;
     }
 
     /**
