@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.Gson;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -20,6 +22,10 @@ public class ChessGame implements Cloneable {
 
         board = new ChessBoard();
         board.resetBoard();
+    }
+
+    public static ChessGame fromJson(String json) {
+        return new Gson().fromJson(json, ChessGame.class);
     }
 
     /**
@@ -215,6 +221,10 @@ public class ChessGame implements Cloneable {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public String toJson() {
+        return new Gson().toJson(this);
     }
 
     @Override
