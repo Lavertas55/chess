@@ -1,5 +1,8 @@
 package websocket;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import io.javalin.websocket.*;
@@ -38,6 +41,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
                 switch (action.getCommandType()) {
                     case CONNECT -> connect(action.getAuthToken(), action.getGameID(), ctx.session);
+                    case MAKE_MOVE -> makeMove(
+                            action.getAuthToken(),
+                            action.getGameID(),
+                            action.getMove(),
+                            ctx.session
+                    );
                 }
             } catch (ResponseException ex) {
                 ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
@@ -77,6 +86,108 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connectionManager.broadcast(gameID, session, notificationMessage);
 
         session.getRemote().sendString(gameMessage.toString());
+    }
+
+    private void makeMove(
+            String authToken,
+            int gameID,
+            ChessMove move,
+            Session session
+    ) throws IOException, ResponseException {
+        authService.verifySession(authToken);
+        int userID = authService.getUserID(authToken);
+
+        GameData gameData = gameService.getGame(gameID);
+
+        ChessGame.TeamColor userColor = getTeamColor(gameData, userID);
+        ChessGame.TeamColor opponentColor = userColor.equals(ChessGame.TeamColor.WHITE) ?
+                ChessGame.TeamColor.BLACK :
+                ChessGame.TeamColor.WHITE;
+
+        ChessGame game = ChessGame.fromJson(gameData.gameString());
+        validateTurn(userColor, game);
+
+        String stateString = null;
+        try {
+            game.makeMove(move);
+
+            if (game.isInCheckmate(opponentColor)) {
+                stateString = "CHECKMATE";
+                game.endGame();
+            }
+            else if (game.isInStalemate(opponentColor)) {
+                stateString = "STALEMATE";
+                game.endGame();
+            }
+            else if (game.isInCheck(opponentColor)) {
+                stateString = "CHECK";
+            }
+        }
+        catch (InvalidMoveException ex) {
+            throw new ResponseException(ResponseException.Code.FORBIDDEN, ex.getMessage());
+        }
+
+        gameService.updateGame(gameID, game.toJson());
+
+        String username = userService.getUsername(userID);
+
+        ServerMessage gameResponse = new ServerMessage(
+                ServerMessage.ServerMessageType.LOAD_GAME,
+                game.toJson()
+        );
+
+        ServerMessage notificationResponse = new ServerMessage(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                String.format("%s moved %s to %s", username, move.getStartPosition(), move.getEndPosition())
+        );
+
+        if (stateString != null) {
+            String opponentUsername = switch (userColor) {
+                case WHITE -> userService.getUsername(gameData.blackUserID());
+                case BLACK -> userService.getUsername(gameData.whiteUserID());
+            };
+
+            ServerMessage stateResponse = new ServerMessage(
+                    ServerMessage.ServerMessageType.NOTIFICATION,
+                    String.format("%s is in %s", opponentUsername, stateString)
+            );
+
+            connectionManager.broadcast(gameID, null, stateResponse);
+        }
+
+        connectionManager.broadcast(gameID, null, gameResponse);
+        connectionManager.broadcast(gameID, session, notificationResponse);
+    }
+
+    private ChessGame.TeamColor getTeamColor(GameData gameData, int userID) throws ResponseException {
+        if (gameData.whiteUserID().equals(userID)) {
+            return ChessGame.TeamColor.WHITE;
+        }
+        else if (gameData.blackUserID().equals(userID)) {
+            return ChessGame.TeamColor.BLACK;
+        }
+        else {
+            throw new ResponseException(
+                    ResponseException.Code.FORBIDDEN,
+                    String.format("You are not a player in game %d", gameData.gameID())
+            );
+        }
+    }
+
+    private void validateTurn(ChessGame.TeamColor userTeam, ChessGame game) throws ResponseException {
+        if (game.isGameDone()) {
+            throw new ResponseException(
+                    ResponseException.Code.FORBIDDEN,
+                    "Game is over"
+            );
+        }
+
+        if (!userTeam.equals(game.getTeamTurn())) {
+            throw new ResponseException(
+                    ResponseException.Code.FORBIDDEN,
+                    "It is not your turn"
+            );
+        }
     }
 
     @Override
