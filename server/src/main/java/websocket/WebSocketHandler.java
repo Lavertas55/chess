@@ -51,6 +51,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                             action.getAuthToken(),
                             action.getGameID()
                     );
+                    case LEAVE -> leave(
+                            action.getAuthToken(),
+                            action.getGameID(),
+                            ctx.session
+                    );
                 }
             } catch (ResponseException ex) {
                 ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
@@ -205,7 +210,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if (userID != gameData.whiteUserID() && userID != gameData.blackUserID()) {
             throw new ResponseException(
                     ResponseException.Code.FORBIDDEN,
-                    "You are not a player in this game"
+                    String.format("You are not a player in game %s", gameData.gameName())
             );
         }
 
@@ -226,6 +231,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         );
 
         connectionManager.broadcast(gameID, null, notificationMessage);
+    }
+
+    private void leave(String authToken, int gameID, Session session) throws IOException, ResponseException {
+        authService.verifySession(authToken);
+
+        GameData gameData = gameService.getGame(gameID);
+
+        int userID = authService.getUserID(authToken);
+        String username = userService.getUsername(userID);
+
+        if (!connectionManager.contains(gameID, session)) {
+            throw new ResponseException(
+                    ResponseException.Code.FORBIDDEN,
+                    String.format("You are not a member of game %s", gameData.gameName())
+            );
+        }
+
+        if (Integer.valueOf(userID).equals(gameData.whiteUserID())) {
+            gameService.leaveGame(gameID, ChessGame.TeamColor.WHITE, userID);
+        }
+        else if (Integer.valueOf(userID).equals(gameData.blackUserID())) {
+            gameService.leaveGame(gameID, ChessGame.TeamColor.BLACK, userID);
+        }
+
+        ServerMessage notificationMessage = new ServerMessage(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                String.format("%s has left the game", username)
+        );
+
+        connectionManager.broadcast(gameID, session, notificationMessage);
+        connectionManager.remove(session);
     }
 
     @Override
