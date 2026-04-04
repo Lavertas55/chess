@@ -31,6 +31,15 @@ public class ConnectionManager {
         }
     }
 
+    public boolean contains(int gameID, Session session) {
+        if (!connections.containsKey(gameID)) {
+            return false;
+        }
+
+        ArrayList<Session> sessions = connections.get(gameID);
+        return sessions.contains(session);
+    }
+
     public void broadcast(int gameID, Session excludeSession, ServerMessage message) throws IOException {
         String msg = message.toString();
 
