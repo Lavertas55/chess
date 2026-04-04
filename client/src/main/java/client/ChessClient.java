@@ -1,12 +1,14 @@
 package client;
 
 import chess.ChessGame;
+import exception.ResponseException;
 import ui.*;
 
 import java.util.HashMap;
 
 public class ChessClient implements Client, UIEngine {
     private final ServerFacade serverFacade;
+
     private State state = State.SIGNED_OUT;
     private String authToken = null;
     private ChessGame.TeamColor teamColor;
@@ -17,7 +19,7 @@ public class ChessClient implements Client, UIEngine {
     }
 
     @Override
-    public void run() {
+    public void run() throws ResponseException {
         System.out.println("♕ Welcome to Chess ♕");
 
         Displayable menu = getMenuFromState();
@@ -45,7 +47,7 @@ public class ChessClient implements Client, UIEngine {
         this.games = games;
     }
 
-    private Displayable getMenuFromState() {
+    private Displayable getMenuFromState() throws ResponseException {
         return switch (state) {
             case SIGNED_OUT -> new LoginMenu(this, serverFacade);
             case SIGNED_IN -> new UserMenu(this, serverFacade, authToken, games);

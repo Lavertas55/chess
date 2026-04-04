@@ -1,5 +1,7 @@
 package client;
 
+import exception.ResponseException;
+
 public interface Client {
-    void run();
+    void run() throws ResponseException;
 }
