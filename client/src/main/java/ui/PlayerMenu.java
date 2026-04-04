@@ -4,6 +4,7 @@ import chess.ChessGame;
 import client.ServerFacade;
 import client.State;
 import client.UIEngine;
+import client.websocket.WebSocketFacade;
 import exception.ResponseException;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
@@ -13,11 +14,12 @@ public class PlayerMenu extends GameMenu {
     public PlayerMenu(
             UIEngine engine,
             ServerFacade serverFacade,
+            WebSocketFacade webSocketFacade,
             String authToken,
             ChessGame game,
             ChessGame.TeamColor teamColor
-    ) throws ResponseException {
-        super(engine, serverFacade, authToken, game, teamColor);
+    ) {
+        super(engine, serverFacade, webSocketFacade, authToken, game, teamColor);
     }
 
     @Override
