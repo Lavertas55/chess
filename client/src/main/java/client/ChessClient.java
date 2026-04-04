@@ -16,6 +16,8 @@ public class ChessClient implements Client, UIEngine {
 
     private State state = State.SIGNED_OUT;
     private String authToken = null;
+    private Integer gameID = null;
+    private ChessGame game = null;
     private ChessGame.TeamColor teamColor;
     private HashMap<Integer, Integer> games;
 
@@ -26,7 +28,7 @@ public class ChessClient implements Client, UIEngine {
     }
 
     @Override
-    public void run() throws ResponseException {
+    public void run() {
         System.out.println("♕ Welcome to Chess ♕");
 
         Displayable menu = getMenuFromState();
@@ -54,12 +56,22 @@ public class ChessClient implements Client, UIEngine {
         this.games = games;
     }
 
-    private Displayable getMenuFromState() throws ResponseException {
+    @Override
+    public void setGame(ChessGame game) {
+        this.game = game;
+    }
+
+    @Override
+    public void setGameID(Integer gameID) {
+        this.gameID = gameID;
+    }
+
+    private Displayable getMenuFromState() {
         return switch (state) {
             case SIGNED_OUT -> new LoginMenu(this, serverFacade);
             case SIGNED_IN -> new UserMenu(this, serverFacade, authToken, games);
-            case IN_GAME -> new PlayerMenu(this, serverFacade, authToken, new ChessGame(), teamColor);
-            case OBSERVING -> new ObservingMenu(this, serverFacade, authToken, new ChessGame());
+            case IN_GAME -> new PlayerMenu(this, serverFacade, webSocketFacade, authToken, game, teamColor);
+            case OBSERVING -> new ObservingMenu(this, serverFacade, webSocketFacade, authToken, game);
             case QUIT -> new QuitMenu();
         };
     }
