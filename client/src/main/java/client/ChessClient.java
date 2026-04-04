@@ -1,6 +1,9 @@
 package client;
 
 import chess.ChessGame;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
+import client.websocket.WebSocketNotificationHandler;
 import exception.ResponseException;
 import ui.*;
 
@@ -8,14 +11,18 @@ import java.util.HashMap;
 
 public class ChessClient implements Client, UIEngine {
     private final ServerFacade serverFacade;
+    private final WebSocketFacade webSocketFacade;
+    private final NotificationHandler notificationHandler;
 
     private State state = State.SIGNED_OUT;
     private String authToken = null;
     private ChessGame.TeamColor teamColor;
     private HashMap<Integer, Integer> games;
 
-    public ChessClient(String serverURL) {
+    public ChessClient(String serverURL) throws ResponseException {
         serverFacade = new ServerFacade(serverURL);
+        notificationHandler = new WebSocketNotificationHandler(this);
+        webSocketFacade = new WebSocketFacade(serverURL, notificationHandler);
     }
 
     @Override
