@@ -1,10 +1,8 @@
-package client;
+package client.websocket;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
 import jakarta.websocket.*;
-import ui.WebSocketNotificationHandler;
-import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -13,9 +11,9 @@ import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
     Session session;
-    WebSocketNotificationHandler webSocketNotificationHandler;
+    NotificationHandler webSocketNotificationHandler;
 
-    public WebSocketFacade(String url, WebSocketNotificationHandler webSocketNotificationHandler) throws ResponseException {
+    public WebSocketFacade(String url, NotificationHandler webSocketNotificationHandler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");

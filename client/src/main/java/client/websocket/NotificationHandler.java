@@ -1,7 +1,7 @@
-package ui;
+package client.websocket;
 
 import websocket.messages.ServerMessage;
 
-public interface WebSocketNotificationHandler {
+public interface NotificationHandler {
     void handleNotification(ServerMessage notification);
 }

@@ -1,0 +1,36 @@
+package client.websocket;
+
+import chess.ChessGame;
+import client.UIEngine;
+import websocket.messages.ServerMessage;
+
+import static ui.EscapeSequences.*;
+
+public class WebSocketNotificationHandler implements NotificationHandler {
+    private final UIEngine engine;
+
+    public WebSocketNotificationHandler(UIEngine engine) {
+        this.engine = engine;
+    }
+
+    @Override
+    public void handleNotification(ServerMessage notification) {
+        switch (notification.getServerMessageType()) {
+            case NOTIFICATION -> notifyUser(notification.getMessage());
+            case ERROR -> notifyError(notification.getMessage());
+            case LOAD_GAME -> loadGame(notification.getMessage());
+        }
+    }
+
+    private void notifyUser(String msg) {
+        System.out.println(SET_TEXT_COLOR_BLUE + msg);
+    }
+
+    private void notifyError(String msg) {
+        System.out.println(SET_TEXT_COLOR_RED + msg);
+    }
+
+    private void loadGame(String msg) {
+        engine.setGame(ChessGame.fromJson(msg));
+    }
+}
