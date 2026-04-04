@@ -47,6 +47,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                             action.getMove(),
                             ctx.session
                     );
+                    case RESIGN -> resign(
+                            action.getAuthToken(),
+                            action.getGameID()
+                    );
                 }
             } catch (ResponseException ex) {
                 ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
@@ -188,6 +192,40 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     "It is not your turn"
             );
         }
+    }
+
+    private void resign(String authToken, int gameID) throws IOException, ResponseException {
+        authService.verifySession(authToken);
+
+        GameData gameData = gameService.getGame(gameID);
+
+        int userID = authService.getUserID(authToken);
+        String username = userService.getUsername(userID);
+
+        if (userID != gameData.whiteUserID() && userID != gameData.blackUserID()) {
+            throw new ResponseException(
+                    ResponseException.Code.FORBIDDEN,
+                    "You are not a player in this game"
+            );
+        }
+
+        ChessGame game = ChessGame.fromJson(gameData.gameString());
+        if (game.isGameDone()) {
+            throw new ResponseException(
+                    ResponseException.Code.FORBIDDEN,
+                    "Game has already ended"
+            );
+        }
+
+        game.endGame();
+        gameService.updateGame(gameID, game.toJson());
+
+        ServerMessage notificationMessage = new ServerMessage(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                String.format("%s has resigned", username)
+        );
+
+        connectionManager.broadcast(gameID, null, notificationMessage);
     }
 
     @Override
