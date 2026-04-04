@@ -16,7 +16,7 @@ public class PlayerMenu extends GameMenu {
             String authToken,
             ChessGame game,
             ChessGame.TeamColor teamColor
-    ) {
+    ) throws ResponseException {
         super(engine, serverFacade, authToken, game, teamColor);
     }
 
