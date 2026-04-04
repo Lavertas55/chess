@@ -9,6 +9,7 @@ import exception.ResponseException;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class GameService {
 
@@ -58,13 +59,29 @@ public class GameService {
         }
     }
 
-    public void joinGame(int gameID, ChessGame.TeamColor color, int userID) throws ResponseException {
+    public void joinGame(int gameID, ChessGame.TeamColor color, Integer userID) throws ResponseException {
         try {
             if (gameDAO.getGameUser(gameID, color) != null){
                 throw new ResponseException(ResponseException.Code.FORBIDDEN, "Forbidden");
             }
 
             gameDAO.updateGameUser(gameID, color, userID);
+        }
+        catch (BadDataException | DataNotFoundException e) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
+        }
+        catch (DataException e) {
+            throw new ResponseException(ResponseException.Code.SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public void leaveGame(int gameID, ChessGame.TeamColor color, Integer userID) throws ResponseException {
+        try {
+            if (!gameDAO.getGameUser(gameID, color).equals(userID)) {
+                throw new ResponseException(ResponseException.Code.FORBIDDEN, "Forbidden");
+            }
+
+            gameDAO.updateGameUser(gameID, color, null);
         }
         catch (BadDataException | DataNotFoundException e) {
             throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Bad Request");
