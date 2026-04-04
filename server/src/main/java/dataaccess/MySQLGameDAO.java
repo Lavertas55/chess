@@ -114,7 +114,13 @@ public class MySQLGameDAO implements GameDAO {
 
         try (Connection connection = DatabaseManager.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
-                preparedStatement.setInt(1, userID);
+                if (userID == null) {
+                    preparedStatement.setNull(1, Types.INTEGER);
+                }
+                else {
+                    preparedStatement.setInt(1, userID);
+                }
+
                 preparedStatement.setInt(2, gameID);
 
                 int result = preparedStatement.executeUpdate();
