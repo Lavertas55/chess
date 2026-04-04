@@ -20,7 +20,7 @@ import static ui.EscapeSequences.SET_TEXT_COLOR_BLACK;
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
 import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
 
-public abstract class GameMenu extends UIMenu {
+public abstract class GameMenu extends UIMenu implements WebSocketNotificationHandler {
     private static final int BOARD_SIZE_IN_CELLS = 10;
     private static final int CELL_SIZE = 3;
     private static final String EMPTY = " ";
@@ -47,6 +47,11 @@ public abstract class GameMenu extends UIMenu {
         draw();
         help();
         return super.run();
+    }
+
+    @Override
+    public void handleNotification(ServerMessage message) {
+
     }
 
     void draw() {
