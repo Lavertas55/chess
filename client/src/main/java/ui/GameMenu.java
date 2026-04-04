@@ -4,12 +4,8 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import client.ServerFacade;
-import client.State;
-import client.UIEngine;
-import client.WebSocketFacade;
-import exception.ResponseException;
-import websocket.messages.ServerMessage;
+import client.*;
+import client.websocket.WebSocketFacade;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -23,7 +19,7 @@ import static ui.EscapeSequences.SET_TEXT_COLOR_BLACK;
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
 import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
 
-public abstract class GameMenu extends UIMenu implements WebSocketNotificationHandler {
+public abstract class GameMenu extends UIMenu {
     private static final int BOARD_SIZE_IN_CELLS = 10;
     private static final int CELL_SIZE = 3;
     private static final String EMPTY = " ";
@@ -36,12 +32,13 @@ public abstract class GameMenu extends UIMenu implements WebSocketNotificationHa
     public GameMenu(
             UIEngine engine,
             ServerFacade serverFacade,
+            WebSocketFacade webSocketFacade,
             String authToken,
             ChessGame game,
             ChessGame.TeamColor teamColor
-    ) throws ResponseException {
+    ) {
         super(engine, serverFacade);
-        this.webSocketFacade = new WebSocketFacade(serverFacade.getServerURL(), this);
+        this.webSocketFacade = webSocketFacade;
         this.authToken = authToken;
         this.game = game;
         this.teamColor = teamColor;
@@ -52,11 +49,6 @@ public abstract class GameMenu extends UIMenu implements WebSocketNotificationHa
         draw();
         help();
         return super.run();
-    }
-
-    @Override
-    public void handleNotification(ServerMessage message) {
-
     }
 
     void draw() {
