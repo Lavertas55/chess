@@ -40,6 +40,10 @@ public class ServerMessage {
         return this.serverMessageType;
     }
 
+    public String getMessage() {
+        return this.message;
+    }
+
     public String getGame() {
         return this.game;
     }
