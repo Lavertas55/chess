@@ -10,7 +10,12 @@ import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
 
 public class ObservingMenu extends GameMenu {
-    public ObservingMenu(UIEngine engine, ServerFacade serverFacade, String authToken, ChessGame game) {
+    public ObservingMenu(
+            UIEngine engine,
+            ServerFacade serverFacade,
+            String authToken,
+            ChessGame game
+    ) throws ResponseException {
         super(engine, serverFacade, authToken, game, ChessGame.TeamColor.WHITE);
     }
 
