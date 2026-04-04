@@ -10,14 +10,7 @@ import client.websocket.WebSocketFacade;
 import java.io.PrintStream;
 import java.util.Optional;
 
-import static ui.EscapeSequences.RESET_BG_COLOR;
-import static ui.EscapeSequences.RESET_TEXT_COLOR;
-import static ui.EscapeSequences.SET_BG_COLOR_BLACK;
-import static ui.EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-import static ui.EscapeSequences.SET_BG_COLOR_WHITE;
-import static ui.EscapeSequences.SET_TEXT_COLOR_BLACK;
-import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
-import static ui.EscapeSequences.SET_TEXT_COLOR_RED;
+import static ui.EscapeSequences.*;
 
 public abstract class GameMenu extends UIMenu {
     private static final int BOARD_SIZE_IN_CELLS = 10;
