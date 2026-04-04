@@ -7,6 +7,9 @@ import chess.ChessPosition;
 import client.ServerFacade;
 import client.State;
 import client.UIEngine;
+import client.WebSocketFacade;
+import exception.ResponseException;
+import websocket.messages.ServerMessage;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -28,6 +31,7 @@ public abstract class GameMenu extends UIMenu implements WebSocketNotificationHa
     final String authToken;
     final ChessGame game;
     final ChessGame.TeamColor teamColor;
+    final WebSocketFacade webSocketFacade;
 
     public GameMenu(
             UIEngine engine,
@@ -35,8 +39,9 @@ public abstract class GameMenu extends UIMenu implements WebSocketNotificationHa
             String authToken,
             ChessGame game,
             ChessGame.TeamColor teamColor
-    ) {
+    ) throws ResponseException {
         super(engine, serverFacade);
+        this.webSocketFacade = new WebSocketFacade(serverFacade.getServerURL(), this);
         this.authToken = authToken;
         this.game = game;
         this.teamColor = teamColor;
