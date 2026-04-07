@@ -41,7 +41,11 @@ public class ServerMessage {
     }
 
     public String getMessage() {
-        return this.message;
+        return switch(this.serverMessageType) {
+            case NOTIFICATION -> this.message;
+            case ERROR -> this.errorMessage;
+            case LOAD_GAME -> this.game;
+        };
     }
 
     public String getGame() {
