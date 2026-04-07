@@ -18,6 +18,7 @@ public class ChessClient implements Client, UIEngine {
     private String authToken = null;
     private Integer gameID = null;
     private ChessGame game = null;
+    private boolean waitingForResponse = false;
     private ChessGame.TeamColor teamColor;
     private HashMap<Integer, Integer> games;
 
@@ -52,6 +53,11 @@ public class ChessClient implements Client, UIEngine {
     }
 
     @Override
+    public ChessGame.TeamColor getTeamColor() {
+        return teamColor;
+    }
+
+    @Override
     public void setGames(HashMap<Integer, Integer> games) {
         this.games = games;
     }
@@ -62,16 +68,44 @@ public class ChessClient implements Client, UIEngine {
     }
 
     @Override
+    public ChessGame getGame() {
+        return game;
+    }
+
+    @Override
     public void setGameID(Integer gameID) {
         this.gameID = gameID;
+    }
+
+    @Override
+    public void setWaiting(boolean state) {
+        this.waitingForResponse = state;
+    }
+
+    @Override
+    public boolean isWaiting() {
+        return waitingForResponse;
     }
 
     private Displayable getMenuFromState() {
         return switch (state) {
             case SIGNED_OUT -> new LoginMenu(this, serverFacade);
             case SIGNED_IN -> new UserMenu(this, serverFacade, authToken, games);
-            case IN_GAME -> new PlayerMenu(this, serverFacade, webSocketFacade, authToken, game, teamColor);
-            case OBSERVING -> new ObservingMenu(this, serverFacade, webSocketFacade, authToken, game);
+            case IN_GAME -> PlayerMenu.getPlayerMenu(
+                    this,
+                    serverFacade,
+                    webSocketFacade,
+                    authToken,
+                    gameID,
+                    teamColor
+            );
+            case OBSERVING -> new ObservingMenu(
+                    this,
+                    serverFacade,
+                    webSocketFacade,
+                    authToken,
+                    gameID
+            );
             case QUIT -> new QuitMenu();
         };
     }
