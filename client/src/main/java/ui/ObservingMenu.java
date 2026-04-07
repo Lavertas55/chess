@@ -16,9 +16,9 @@ public class ObservingMenu extends GameMenu {
             ServerFacade serverFacade,
             WebSocketFacade webSocketFacade,
             String authToken,
-            ChessGame game
+            int gameID
     ) {
-        super(engine, serverFacade, webSocketFacade, authToken, game, ChessGame.TeamColor.WHITE);
+        super(engine, serverFacade, webSocketFacade, authToken, gameID, ChessGame.TeamColor.WHITE);
     }
 
     @Override
