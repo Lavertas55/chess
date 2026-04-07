@@ -122,6 +122,7 @@ public class UserMenu extends UIMenu {
 
             serverFacade.joinGame(authToken, teamColor, gameID);
             engine.setTeamColor(teamColor);
+            engine.setGameID(gameID);
 
             notify(String.format("\nSuccessfully joined game: %d as %s\n", mapGameID, teamColorString.toUpperCase()));
             return State.IN_GAME;
@@ -152,6 +153,8 @@ public class UserMenu extends UIMenu {
                         String.format("Game %d does not exist: Use list to see available games", mapGameID)
                 );
             }
+
+            engine.setGameID(games.get(mapGameID));
 
             notify(String.format("\nSuccessfully observing game: %d\n", mapGameID));
             return State.OBSERVING;
