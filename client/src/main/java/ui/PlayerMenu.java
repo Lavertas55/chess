@@ -11,15 +11,44 @@ import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
 
 public class PlayerMenu extends GameMenu {
-    public PlayerMenu(
+    private static PlayerMenu playerMenuInstance = null;
+
+    public static PlayerMenu getPlayerMenu(
             UIEngine engine,
             ServerFacade serverFacade,
             WebSocketFacade webSocketFacade,
             String authToken,
-            ChessGame game,
+            int gameID,
             ChessGame.TeamColor teamColor
     ) {
-        super(engine, serverFacade, webSocketFacade, authToken, game, teamColor);
+        if (
+                playerMenuInstance == null ||
+                !playerMenuInstance.authToken.equals(authToken) ||
+                playerMenuInstance.gameID != gameID ||
+                !playerMenuInstance.teamColor.equals(teamColor)
+        ) {
+            playerMenuInstance = new PlayerMenu(
+                    engine,
+                    serverFacade,
+                    webSocketFacade,
+                    authToken,
+                    gameID,
+                    teamColor
+            );
+        }
+
+        return playerMenuInstance;
+    }
+
+    PlayerMenu(
+            UIEngine engine,
+            ServerFacade serverFacade,
+            WebSocketFacade webSocketFacade,
+            String authToken,
+            int gameID,
+            ChessGame.TeamColor teamColor
+    ) {
+        super(engine, serverFacade, webSocketFacade, authToken, gameID, teamColor);
     }
 
     @Override
