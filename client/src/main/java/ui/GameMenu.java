@@ -51,8 +51,10 @@ public abstract class GameMenu extends UIMenu {
         return null;
     }
 
-    State exit() {
+    State exit() throws ResponseException {
         notify("Exiting...\n");
+
+        webSocketFacade.leaveGame(authToken, gameID);
 
         return State.SIGNED_IN;
     }
