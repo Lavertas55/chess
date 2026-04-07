@@ -3,12 +3,13 @@ package ui;
 import chess.ChessGame;
 import client.*;
 import client.websocket.WebSocketFacade;
+import exception.ResponseException;
 
 import java.util.Optional;
 
 public abstract class GameMenu extends UIMenu {
     final String authToken;
-    final ChessGame game;
+    final int gameID;
     final ChessGame.TeamColor teamColor;
     final WebSocketFacade webSocketFacade;
     final BoardDrawer boardDrawer = new BoardDrawer();
@@ -18,24 +19,36 @@ public abstract class GameMenu extends UIMenu {
             ServerFacade serverFacade,
             WebSocketFacade webSocketFacade,
             String authToken,
-            ChessGame game,
+            int gameID,
             ChessGame.TeamColor teamColor
     ) {
         super(engine, serverFacade);
         this.webSocketFacade = webSocketFacade;
         this.authToken = authToken;
-        this.game = game;
+        this.gameID = gameID;
         this.teamColor = teamColor;
+
+        try {
+            webSocketFacade.joinGame(authToken, gameID);
+            engine.setWaiting(true);
+        }
+        catch (ResponseException ex) {
+            alert(ex.getMessage());
+        }
     }
 
     @Override
-    Optional<State> run() {
-        help();
+    public Optional<State> run() {
+        if (engine.isWaiting()) {
+            return Optional.empty();
+        }
+
         return super.run();
     }
 
-    void draw() {
-        boardDrawer.drawBoard(System.out, game.getBoard(), teamColor);
+    State draw() {
+        boardDrawer.drawBoard(System.out, engine.getGame().getBoard(), teamColor);
+        return null;
     }
 
     State exit() {
