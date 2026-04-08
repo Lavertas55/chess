@@ -15,6 +15,7 @@ public class BoardDrawer {
     private static final String EMPTY = " ";
 
     public void drawBoard(PrintStream out, ChessBoard board, ChessGame.TeamColor teamColor) {
+        System.out.println();
         drawRankHeaders(out, teamColor);
         drawChessRows(out, teamColor, board);
         drawRankHeaders(out, teamColor);
