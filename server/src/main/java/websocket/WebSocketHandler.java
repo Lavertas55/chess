@@ -150,6 +150,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 String.format("%s moved %s to %s", username, move.getStartPosition(), move.getEndPosition())
         );
 
+        connectionManager.broadcast(gameID, null, gameResponse);
+        connectionManager.broadcast(gameID, session, notificationResponse);
+
         if (stateString != null) {
             String opponentUsername = switch (userColor) {
                 case WHITE -> userService.getUsername(gameData.blackUserID());
@@ -163,9 +166,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             connectionManager.broadcast(gameID, null, stateResponse);
         }
-
-        connectionManager.broadcast(gameID, null, gameResponse);
-        connectionManager.broadcast(gameID, session, notificationResponse);
     }
 
     private ChessGame.TeamColor getTeamColor(GameData gameData, int userID) throws ResponseException {
