@@ -25,11 +25,11 @@ public class WebSocketNotificationHandler implements NotificationHandler {
     }
 
     private void notifyUser(String msg) {
-        System.out.println(SET_TEXT_COLOR_BLUE + msg);
+        System.out.println("\n" + SET_TEXT_COLOR_BLUE + msg + SET_TEXT_COLOR_GREEN);
     }
 
     private void notifyError(String msg) {
-        System.out.println(SET_TEXT_COLOR_RED + msg);
+        System.out.println("\n" + SET_TEXT_COLOR_RED + msg + SET_TEXT_COLOR_GREEN);
     }
 
     private void loadGame(String msg) {
