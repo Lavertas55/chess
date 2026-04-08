@@ -132,7 +132,7 @@ public class ChessGame implements Cloneable {
         }
 
         if (piece.getTeamColor() != currentTeam) {
-            throw new InvalidMoveException(String.format("It is not %s's turn", piece.getTeamColor()));
+            throw new InvalidMoveException(String.format("You cannot move %s's pieces", piece.getTeamColor()));
         }
 
         if (!validMoves.contains(move)) {
