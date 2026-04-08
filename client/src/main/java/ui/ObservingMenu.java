@@ -11,7 +11,27 @@ import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
 
 public class ObservingMenu extends GameMenu {
-    public ObservingMenu(
+    private static ObservingMenu observingMenuInstance = null;
+
+    public static ObservingMenu getObservingMenu(
+            UIEngine engine,
+            ServerFacade serverFacade,
+            WebSocketFacade webSocketFacade,
+            String authToken,
+            int gameID
+    ) {
+        if (
+                observingMenuInstance == null ||
+                !observingMenuInstance.authToken.equals(authToken) ||
+                observingMenuInstance.gameID != gameID
+        ) {
+            observingMenuInstance = new ObservingMenu(engine, serverFacade, webSocketFacade, authToken, gameID);
+        }
+
+        return observingMenuInstance;
+    }
+
+    private ObservingMenu(
             UIEngine engine,
             ServerFacade serverFacade,
             WebSocketFacade webSocketFacade,
@@ -55,6 +75,6 @@ public class ObservingMenu extends GameMenu {
 
     @Override
     void deleteMenuInstance() {
-        throw new RuntimeException("not implemented");
+        observingMenuInstance = null;
     }
 }

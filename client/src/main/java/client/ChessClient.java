@@ -99,7 +99,7 @@ public class ChessClient implements Client, UIEngine {
                     gameID,
                     teamColor
             );
-            case OBSERVING -> new ObservingMenu(
+            case OBSERVING -> ObservingMenu.getObservingMenu(
                     this,
                     serverFacade,
                     webSocketFacade,
