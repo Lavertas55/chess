@@ -75,9 +75,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         GameData game = gameService.getGame(gameID);
 
         String teamColor = "OBSERVER";
-        if (game.whiteUserID().equals(userID)) {
+        if (game.whiteUserID() != null && game.whiteUserID().equals(userID)) {
             teamColor = "WHITE";
-        } else if (game.blackUserID().equals(userID)) {
+        } else if (game.blackUserID() != null && game.blackUserID().equals(userID)) {
             teamColor = "BLACK";
         }
 
