@@ -55,7 +55,10 @@ public abstract class GameMenu extends UIMenu {
         notify("Exiting...\n");
 
         webSocketFacade.leaveGame(authToken, gameID);
+        deleteMenuInstance();
 
         return State.SIGNED_IN;
     }
+
+    abstract void deleteMenuInstance();
 }

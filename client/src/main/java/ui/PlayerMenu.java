@@ -83,4 +83,9 @@ public class PlayerMenu extends GameMenu {
 
         return State.IN_GAME;
     }
+
+    @Override
+    void deleteMenuInstance() {
+        playerMenuInstance = null;
+    }
 }

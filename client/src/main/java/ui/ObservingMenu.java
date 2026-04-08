@@ -52,4 +52,9 @@ public class ObservingMenu extends GameMenu {
 
         return State.OBSERVING;
     }
+
+    @Override
+    void deleteMenuInstance() {
+        throw new RuntimeException("not implemented");
+    }
 }
