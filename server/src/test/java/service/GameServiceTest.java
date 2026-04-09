@@ -29,7 +29,7 @@ class GameServiceTest {
         Integer whiteUserID = null;
         Integer blackUserID = null;
         String gameName = "pretty cool game";
-        String gameString = new ChessGame().getBoard().toJson();
+        String gameString = new ChessGame().toJson();
 
         validGame = new GameData(1, whiteUserID, blackUserID, gameName, gameString);
     }
