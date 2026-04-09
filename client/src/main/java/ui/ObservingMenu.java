@@ -44,6 +44,8 @@ public class ObservingMenu extends GameMenu {
     @Override
     State eval(String cmd, String... params) throws ResponseException {
         return switch (cmd) {
+            case "draw" -> draw();
+            case "highlight" -> highlightMoves(params);
             case "exit" -> exit();
             default -> help();
         };
@@ -65,6 +67,7 @@ public class ObservingMenu extends GameMenu {
              
              USAGE:
              - draw - Redraw board
+             - highlight <PIECE POSITION> - Highlight possible moves for a specific piece
              - exit - Exit current game
              - help - Show available commands
              """
