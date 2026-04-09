@@ -10,8 +10,7 @@ import client.UIEngine;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Scanner;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
@@ -123,7 +122,21 @@ public class PlayerMenu extends GameMenu {
     }
 
     private State resign() throws ResponseException {
-        webSocketFacade.resign(authToken, gameID);
+        Scanner scanner = new Scanner(System.in);
+
+        String input = "";
+        while (!input.equals("yes") && !input.equals("no")) {
+            System.out.print(RESET_TEXT_COLOR + "Are you sure you want to resign? >>> " + SET_TEXT_COLOR_GREEN);
+            input = scanner.nextLine().toLowerCase();
+
+            if (!input.equals("yes") && !input.equals("no")) {
+                alert("Please enter YES or NO\n");
+            }
+        }
+
+        if (input.equals("yes")) {
+            webSocketFacade.resign(authToken, gameID);
+        }
 
         return State.IN_GAME;
     }
@@ -137,6 +150,7 @@ public class PlayerMenu extends GameMenu {
              - move <START POSITION> <END POSITION> [PROMOTION TYPE] - Submit move (Promotion type is optional)
              - draw - Redraw board
              - resign - resign from current game
+             - highlight <PIECE POSITION> - Highlight possible moves for a specific piece
              - exit - Exit current game
              - help - Show available commands
              """
