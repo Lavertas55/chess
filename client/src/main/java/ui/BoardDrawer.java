@@ -6,6 +6,8 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 
 import java.io.PrintStream;
+import java.util.Collection;
+import java.util.HashSet;
 
 import static ui.EscapeSequences.*;
 
@@ -15,9 +17,19 @@ public class BoardDrawer {
     private static final String EMPTY = " ";
 
     public void drawBoard(PrintStream out, ChessBoard board, ChessGame.TeamColor teamColor) {
+        drawBoard(out, board, teamColor, null, new HashSet<>());
+    }
+
+    public void drawBoard(
+            PrintStream out,
+            ChessBoard board,
+            ChessGame.TeamColor teamColor,
+            ChessPosition start,
+            Collection<ChessPosition> spacesToHighlight
+    ) {
         System.out.println();
         drawRankHeaders(out, teamColor);
-        drawChessRows(out, teamColor, board);
+        drawChessRows(out, teamColor, board, start, spacesToHighlight);
         drawRankHeaders(out, teamColor);
     }
 
@@ -60,7 +72,13 @@ public class BoardDrawer {
         out.print(EMPTY.repeat(suffixLength));
     }
 
-    private void drawChessRows(PrintStream out, ChessGame.TeamColor teamColor, ChessBoard board) {
+    private void drawChessRows(
+            PrintStream out,
+            ChessGame.TeamColor teamColor,
+            ChessBoard board,
+            ChessPosition start,
+            Collection<ChessPosition> spacesToHighlight
+    ) {
         String rowStartColor = SET_BG_COLOR_WHITE;
 
         int boardRow;
@@ -75,14 +93,22 @@ public class BoardDrawer {
         }
 
         while (boardRow < BOARD_SIZE_IN_CELLS - 1 && boardRow > 0) {
-            drawRow(out, boardRow, rowStartColor, board, teamColor);
+            drawRow(out, boardRow, rowStartColor, board, teamColor, start, spacesToHighlight);
             rowStartColor = rowStartColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
 
             boardRow += step;
         }
     }
 
-    private void drawRow(PrintStream out, int rowNum, String startColor, ChessBoard board, ChessGame.TeamColor teamColor) {
+    private void drawRow(
+            PrintStream out,
+            int rowNum,
+            String startColor,
+            ChessBoard board,
+            ChessGame.TeamColor teamColor,
+            ChessPosition start,
+            Collection<ChessPosition> spacesToHighlight
+    ) {
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         drawCell(out, String.valueOf(rowNum));
 
@@ -99,7 +125,9 @@ public class BoardDrawer {
 
         String cellColor = startColor;
         while (boardColumn < BOARD_SIZE_IN_CELLS - 1 && boardColumn > 0) {
-            ChessPiece piece = board.getPiece(new ChessPosition(rowNum, boardColumn));
+            ChessPosition currentPosition = new ChessPosition(rowNum, boardColumn);
+
+            ChessPiece piece = board.getPiece(currentPosition);
             String pieceString = piece == null ? EMPTY : piece.toString().toUpperCase();
 
             if (piece != null && piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
@@ -109,9 +137,20 @@ public class BoardDrawer {
                 pieceString = SET_TEXT_COLOR_BLUE + pieceString;
             }
 
+            String oldColor = cellColor;
+            if (spacesToHighlight.contains(currentPosition)) {
+
+                cellColor = cellColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_GREEN : SET_BG_COLOR_DARK_GREEN;
+            }
+
+            if (currentPosition.equals(start)) {
+                cellColor = SET_BG_COLOR_YELLOW;
+            }
+
             out.print(cellColor);
             drawCell(out, pieceString);
 
+            cellColor = oldColor;
             cellColor = cellColor.equals(SET_BG_COLOR_WHITE) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
 
             boardColumn += step;
