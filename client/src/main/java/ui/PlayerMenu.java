@@ -9,6 +9,7 @@ import client.State;
 import client.UIEngine;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
+import websocket.commands.UserGameCommand;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
@@ -59,6 +60,7 @@ public class PlayerMenu extends GameMenu {
         return switch (cmd) {
             case "move" -> makeMove(params);
             case "draw" -> draw();
+            case "resign" -> resign();
             case "exit" -> exit();
             default -> help();
         };
@@ -148,6 +150,12 @@ public class PlayerMenu extends GameMenu {
         };
     }
 
+    private State resign() throws ResponseException {
+        webSocketFacade.resign(authToken, gameID);
+
+        return State.IN_GAME;
+    }
+
     @Override
     State help() {
         notify(
@@ -156,6 +164,7 @@ public class PlayerMenu extends GameMenu {
              USAGE:
              - move <START POSITION> <END POSITION> [PROMOTION TYPE] - Submit move (Promotion type is optional)
              - draw - Redraw board
+             - resign - resign from current game
              - exit - Exit current game
              - help - Show available commands
              """
