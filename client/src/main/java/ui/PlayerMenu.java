@@ -9,7 +9,9 @@ import client.State;
 import client.UIEngine;
 import client.websocket.WebSocketFacade;
 import exception.ResponseException;
-import websocket.commands.UserGameCommand;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_GREEN;
@@ -61,6 +63,7 @@ public class PlayerMenu extends GameMenu {
             case "move" -> makeMove(params);
             case "draw" -> draw();
             case "resign" -> resign();
+            case "highlight" -> highlightMoves(params);
             case "exit" -> exit();
             default -> help();
         };
@@ -79,6 +82,8 @@ public class PlayerMenu extends GameMenu {
         ChessMove move = createChessMove(params);
 
         webSocketFacade.makeMove(authToken, gameID, move);
+        engine.setWaiting(true);
+
 
         return State.IN_GAME;
     }
@@ -130,8 +135,6 @@ public class PlayerMenu extends GameMenu {
                         );
         };
 
-        engine.setWaiting(true);
-
         return new ChessPosition(Character.getNumericValue(rank), Character.getNumericValue(file));
     }
 
@@ -154,6 +157,36 @@ public class PlayerMenu extends GameMenu {
         webSocketFacade.resign(authToken, gameID);
 
         return State.IN_GAME;
+    }
+
+    private State highlightMoves(String... params) throws ResponseException {
+        if (params.length != 1) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <POSITION OF PIECE>");
+        }
+
+        ChessPosition position = convertCoordinates(params[0]);
+        ChessGame game = engine.getGame();
+
+        Collection<ChessMove> validMoves = game.validMoves(position);
+        if (validMoves == null) {
+            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "You must select a space with a piece");
+        }
+
+        Collection<ChessPosition> spacesToHighlight = extractEndPositions(validMoves);
+
+        boardDrawer.drawBoard(System.out, game.getBoard(), teamColor, position, spacesToHighlight);
+
+        return State.IN_GAME;
+    }
+
+    private Collection<ChessPosition> extractEndPositions(Collection<ChessMove> moves) {
+        Collection<ChessPosition> endPositions = new HashSet<>();
+
+        for (ChessMove move : moves) {
+            endPositions.add(move.getEndPosition());
+        }
+
+        return endPositions;
     }
 
     @Override
