@@ -107,37 +107,6 @@ public class PlayerMenu extends GameMenu {
         return new ChessMove(startPosition, endPosition, promotionType);
     }
 
-    private ChessPosition convertCoordinates(String position) throws ResponseException {
-        if (position.length() != 2) {
-            throw new ResponseException(
-                    ResponseException.Code.BAD_REQUEST,
-                    String.format("%s is not a valid chess position", position)
-            );
-        }
-
-        position = position.toLowerCase();
-
-        char file = position.charAt(0);
-        char rank = position.charAt(1);
-
-        file = switch (file) {
-            case 'a' -> '1';
-            case 'b' -> '2';
-            case 'c' -> '3';
-            case 'd' -> '4';
-            case 'e' -> '5';
-            case 'f' -> '6';
-            case 'g' -> '7';
-            case 'h' -> '8';
-            default -> throw new ResponseException(
-                                ResponseException.Code.BAD_REQUEST,
-                                String.format("%s is not a valid chess file (A-H)", file)
-                        );
-        };
-
-        return new ChessPosition(Character.getNumericValue(rank), Character.getNumericValue(file));
-    }
-
     private ChessPiece.PieceType convertPromotionType(String pieceType) throws ResponseException {
         pieceType = pieceType.toLowerCase();
 
@@ -157,36 +126,6 @@ public class PlayerMenu extends GameMenu {
         webSocketFacade.resign(authToken, gameID);
 
         return State.IN_GAME;
-    }
-
-    private State highlightMoves(String... params) throws ResponseException {
-        if (params.length != 1) {
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "Expected: <POSITION OF PIECE>");
-        }
-
-        ChessPosition position = convertCoordinates(params[0]);
-        ChessGame game = engine.getGame();
-
-        Collection<ChessMove> validMoves = game.validMoves(position);
-        if (validMoves == null) {
-            throw new ResponseException(ResponseException.Code.BAD_REQUEST, "You must select a space with a piece");
-        }
-
-        Collection<ChessPosition> spacesToHighlight = extractEndPositions(validMoves);
-
-        boardDrawer.drawBoard(System.out, game.getBoard(), teamColor, position, spacesToHighlight);
-
-        return State.IN_GAME;
-    }
-
-    private Collection<ChessPosition> extractEndPositions(Collection<ChessMove> moves) {
-        Collection<ChessPosition> endPositions = new HashSet<>();
-
-        for (ChessMove move : moves) {
-            endPositions.add(move.getEndPosition());
-        }
-
-        return endPositions;
     }
 
     @Override
